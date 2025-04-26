@@ -1,105 +1,89 @@
 ﻿using ErrorOr;
+using RuanFa.Shop.SharedKernel.Errors;
 using RuanFa.Shop.SharedKernel.Interfaces;
 
 namespace RuanFa.Shop.SharedKernel.Models;
 
-public abstract class AggregateRoot<TId> : 
-    Entity<TId>, 
-    IActionTrackable, 
+public abstract class AggregateRoot<TId> :
+    Entity<TId>,
     IDeletableEntity,
     IVersionable
     where TId : notnull
 {
+    #region Private Fields
     private bool _isDeleted;
-    private string? _createdBy;
-    private string? _updatedBy;
     private string? _deletedBy;
     private DateTimeOffset? _deletedAt;
- 
-    protected AggregateRoot() : base()
-    {
-        Version = 1;
-    }
+    private int _version = 1;
+    #endregion
 
-    protected AggregateRoot(TId id) : base(id)
-    {
-        Version = 1;
-    }
+    #region Constructors
+    protected AggregateRoot() : base() { }
 
-    // Version tracking
-    public int Version { get; private set; }
+    protected AggregateRoot(TId id) : base(id) { }
+    #endregion
 
-    // IActionTrackable implementation
-    public string? CreatedBy
-    {
-        get => _createdBy;
-        set => SetCreatedBy(value);
-    }
-
-    public string? UpdatedBy
-    {
-        get => _updatedBy;
-        set => SetUpdatedBy(value);
-    }
-
+    #region Public Properties
     // IDeletableEntity implementation
-    public bool IsDeleted => _isDeleted;
-    public DateTimeOffset? DeletedAt => _deletedAt;
-    public string? DeletedBy => _deletedBy;
-
-    public static class Errors
+    public bool IsDeleted
     {
-        public static Error AggregateDeleted => Error.Conflict(
-            code: "AggregateRoot.Deleted",
-            description: "Cannot modify a deleted aggregate");
-
-        public static Error DomainEventNull => Error.Validation(
-            code: "AggregateRoot.NullEvent",
-            description: "Domain event cannot be null");
-
-        public static Error AlreadyDeleted => Error.Conflict(
-            code: "AggregateRoot.AlreadyDeleted",
-            description: "Aggregate is already deleted");
-    }
-
-    protected ErrorOr<Updated> SetCreatedBy(string? creator)
-    {
-        if (_isDeleted)
-            return Errors.AggregateDeleted;
-
-        if (_createdBy != creator)
+        get => _isDeleted;
+        set
         {
-            _createdBy = creator;
-            IncrementVersion();
+            var result = SetDeletedState(value);
+            if (result.IsError)
+                throw new InvalidOperationException($"Failed to set deleted state: {result.FirstError.Description}");
         }
-
-        return Result.Updated;
     }
 
-    protected ErrorOr<Updated> SetUpdatedBy(string? updater)
+    public DateTimeOffset? DeletedAt
     {
-        if (_isDeleted)
-            return Errors.AggregateDeleted;
-
-        if (_updatedBy != updater)
+        get => _deletedAt;
+        set
         {
-            _updatedBy = updater;
-            UpdateModificationTime();
-            IncrementVersion();
+            var result = SetDeletedAt(value);
+            if (result.IsError)
+                throw new InvalidOperationException($"Failed to set deleted at: {result.FirstError.Description}");
         }
-
-        return Result.Updated;
     }
 
+    public string? DeletedBy
+    {
+        get => _deletedBy;
+        set
+        {
+            var result = SetDeletedBy(value);
+            if (result.IsError)
+                throw new InvalidOperationException($"Failed to set deleted by: {result.FirstError.Description}");
+        }
+    }
+
+    // IVersionable implementation
+    public int Version
+    {
+        get => _version;
+        set
+        {
+            var result = SetVersion(value);
+            if (result.IsError)
+                throw new InvalidOperationException($"Failed to set version: {result.FirstError.Description}");
+        }
+    }
+    #endregion
+
+    #region Public Methods
     public new ErrorOr<Success> AddDomainEvent(IDomainEvent domainEvent)
     {
-        if (_isDeleted)
-            return Errors.AggregateDeleted;
-
         if (domainEvent is null)
-            return Errors.DomainEventNull;
+            return Entity<TId>.Errors.DomainEventNull;
 
-        base.AddDomainEvent(domainEvent);
+        if (!CanModify())
+            return Entity<TId>.Errors.InvalidModification;
+
+        var result = base.AddDomainEvent(domainEvent);
+        if (result.IsError)
+            return result.FirstError;
+
         IncrementVersion();
         return Result.Success;
     }
@@ -107,34 +91,116 @@ public abstract class AggregateRoot<TId> :
     public ErrorOr<Deleted> Delete(string? deletedBy)
     {
         if (_isDeleted)
-            return Errors.AlreadyDeleted;
+            return DomainErrors.AggregateRoot.AlreadyDeleted;
 
-        _isDeleted = true;
-        _deletedBy = deletedBy;
-        _deletedAt = DateTimeOffset.UtcNow;
-        _updatedBy = deletedBy;
+        if (!CanModify())
+            return Entity<TId>.Errors.InvalidModification;
 
-        UpdateModificationTime();
-        IncrementVersion();
+        var setDeletedResult = SetDeletedState(true);
+        if (setDeletedResult.IsError)
+            return setDeletedResult.FirstError;
+
+        var setDeletedByResult = SetDeletedBy(deletedBy);
+        if (setDeletedByResult.IsError)
+            return setDeletedByResult.FirstError;
+
+        var setDeletedAtResult = SetDeletedAt(DateTimeOffset.UtcNow);
+        if (setDeletedAtResult.IsError)
+            return setDeletedAtResult.FirstError;
+
+        var updateResult = SetUpdatedBy(deletedBy);
+        if (updateResult.IsError)
+            return updateResult.FirstError;
 
         return Result.Deleted;
     }
 
-    protected virtual void IncrementVersion()
+    public new ErrorOr<Success> ClearDomainEvents()
     {
-        Version++;
+        if (!CanModify())
+            return Entity<TId>.Errors.InvalidModification;
+
+        var result = base.ClearDomainEvents();
+        if (result.IsError)
+            return result.FirstError;
+
+        IncrementVersion();
+        return Result.Success;
+    }
+    #endregion
+
+    #region Protected Methods
+    protected override bool CanModify() => !_isDeleted && base.CanModify();
+
+    protected override void OnStateChanged()
+    {
+        base.OnStateChanged();
+        IncrementVersion();
     }
 
-    // Helper method to track all changes
-    protected void TrackChange(string? updatedBy)
+    protected ErrorOr<Updated> SetDeletedState(bool value)
     {
-        if (_createdBy is null)
+        if (!CanModify() && !value)
+            return Entity<TId>.Errors.InvalidModification;
+
+        if (_isDeleted != value)
         {
-            SetCreatedBy(updatedBy);
+            _isDeleted = value;
+            OnStateChanged();
         }
-        else
-        {
-            SetUpdatedBy(updatedBy);
-        }
+
+        return Result.Updated;
     }
+
+    protected ErrorOr<Updated> SetDeletedAt(DateTimeOffset? value)
+    {
+        if (!CanModify())
+            return Entity<TId>.Errors.InvalidModification;
+
+        if (_deletedAt != value)
+        {
+            _deletedAt = value;
+            OnStateChanged();
+        }
+
+        return Result.Updated;
+    }
+
+    protected ErrorOr<Updated> SetDeletedBy(string? value)
+    {
+        if (!CanModify())
+            return Entity<TId>.Errors.InvalidModification;
+
+        if (_deletedBy != value)
+        {
+            _deletedBy = value;
+            OnStateChanged();
+        }
+
+        return Result.Updated;
+    }
+
+    protected ErrorOr<Updated> SetVersion(int value)
+    {
+        if (!CanModify())
+            return Entity<TId>.Errors.InvalidModification;
+
+        if (value <= _version)
+            return Error.Validation("Version.InvalidValue", "New version must be greater than current version");
+
+        _version = value;
+        OnStateChanged();
+        return Result.Updated;
+    }
+
+    protected virtual void IncrementVersion()
+    {
+        var result = SetVersion(_version + 1);
+        if (result.IsError)
+        {
+            throw new InvalidOperationException($"Failed to increment version: {result.FirstError.Description}");
+        }
+        _version++;
+    }
+    #endregion
 }

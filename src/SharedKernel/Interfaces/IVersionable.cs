@@ -1,5 +1,5 @@
 ﻿namespace RuanFa.Shop.SharedKernel.Interfaces;
 public interface IVersionable
 {
-    int Version { get; }
+    int Version { get; set; }
 }

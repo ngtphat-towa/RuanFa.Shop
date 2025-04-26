@@ -1,8 +1,9 @@
-﻿namespace RuanFa.Shop.SharedKernel.Interfaces;
+﻿using ErrorOr;
+
+namespace RuanFa.Shop.SharedKernel.Interfaces;
 public interface IHasDomainEvent
 {
-    IReadOnlyList<IDomainEvent> DomainEvents { get; }
-    void ClearDomainEvents();
-
-    void AddDomainEvent(IDomainEvent domainEvent);
+   public IReadOnlyList<IDomainEvent> DomainEvents { get; }
+   public ErrorOr<Success> ClearDomainEvents();
+   public ErrorOr<Success> AddDomainEvent(IDomainEvent domainEvent);
 }
