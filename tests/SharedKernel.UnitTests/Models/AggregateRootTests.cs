@@ -1,7 +1,8 @@
 ﻿using ErrorOr;
 using RuanFa.Shop.SharedKernel.Interfaces;
 using RuanFa.Shop.SharedKernel.Models;
-using Xunit.Sdk;
+using Shouldly;
+using Xunit;
 
 namespace RuanFa.Shop.SharedKernel.UnitTests.Models;
 
@@ -11,309 +12,198 @@ public class AggregateRootTests
     {
         public TestAggregateRoot() : base() { }
         public TestAggregateRoot(int id) : base(id) { }
-
-        // Expose protected methods for testing
-        public new ErrorOr<Updated> SetCreatedBy(string? creator) => base.SetCreatedBy(creator);
-        public new ErrorOr<Updated> SetUpdatedBy(string? updater) => base.SetUpdatedBy(updater);
-        public new void TrackChange(string? updatedBy) => base.TrackChange(updatedBy);
-        protected new void IncrementVersion() => base.IncrementVersion();
+        public void SetCreatedBy(string createdBy) => CreatedBy = createdBy;
+        public void SetUpdatedBy(string updatedBy) => UpdatedBy = updatedBy;
     }
 
+    private class DifferentTestAggregateRoot : AggregateRoot<int>
+    {
+        public DifferentTestAggregateRoot(int id) : base(id) { }
+    }
+
+    private class TestEvent : IDomainEvent { }
+
+    #region Constructor Tests
     public class ConstructorTests
     {
         [Fact]
         public void DefaultConstructor_InitializesPropertiesCorrectly()
         {
             var aggregate = new TestAggregateRoot();
-
+            aggregate.Id.ShouldBe(0); // Default value for int
             aggregate.CreatedBy.ShouldBeNull();
             aggregate.UpdatedBy.ShouldBeNull();
-            aggregate.IsDeleted.ShouldBeFalse();
-            aggregate.DeletedAt.ShouldBeNull();
-            aggregate.DeletedBy.ShouldBeNull();
-            aggregate.Version.ShouldBe(1);
+            aggregate.CreatedAt.ShouldBe(default);
+            aggregate.UpdatedAt.ShouldBeNull();
+            aggregate.DomainEvents.ShouldNotBeNull();
+            aggregate.DomainEvents.Count.ShouldBe(0);
         }
 
         [Fact]
         public void IdConstructor_InitializesPropertiesCorrectly()
         {
             var aggregate = new TestAggregateRoot(42);
-
             aggregate.Id.ShouldBe(42);
             aggregate.CreatedBy.ShouldBeNull();
             aggregate.UpdatedBy.ShouldBeNull();
-            aggregate.IsDeleted.ShouldBeFalse();
-            aggregate.DeletedAt.ShouldBeNull();
-            aggregate.DeletedBy.ShouldBeNull();
-            aggregate.Version.ShouldBe(1);
-            aggregate.CreatedAt.ShouldNotBe(default);
+            aggregate.CreatedAt.ShouldBe(default);
+            aggregate.UpdatedAt.ShouldBeNull();
+            aggregate.DomainEvents.ShouldNotBeNull();
+            aggregate.DomainEvents.Count.ShouldBe(0);
         }
     }
+    #endregion
 
-    public class ActionTrackingTests
+    #region Property Tests (Inherited from Entity)
+    public class PropertyTests
     {
         [Fact]
-        public void SetCreatedBy_WhenNotDeleted_Succeeds()
+        public void CreatedBy_CanBeSetAndRetrieved()
         {
             var aggregate = new TestAggregateRoot(1);
-            var creator = "test.user";
-
-            var result = aggregate.SetCreatedBy(creator);
-
-            result.IsError.ShouldBeFalse();
-            aggregate.CreatedBy.ShouldBe(creator);
-            aggregate.Version.ShouldBe(2);
+            aggregate.SetCreatedBy("user1");
+            aggregate.CreatedBy.ShouldBe("user1");
         }
 
         [Fact]
-        public void SetCreatedBy_WhenDeleted_Fails()
+        public void UpdatedBy_CanBeSetAndRetrieved()
         {
             var aggregate = new TestAggregateRoot(1);
-            aggregate.Delete("test.user");
-            var initialVersion = aggregate.Version;
-
-            var result = aggregate.SetCreatedBy("new.user");
-
-            result.IsError.ShouldBeTrue();
-            result.FirstError.Type.ShouldBe(ErrorType.Conflict);
-            result.FirstError.Code.ShouldBe("AggregateRoot.Deleted");
-            aggregate.Version.ShouldBe(initialVersion);
+            aggregate.SetUpdatedBy("user2");
+            aggregate.UpdatedBy.ShouldBe("user2");
         }
 
         [Fact]
-        public void SetUpdatedBy_WhenNotDeleted_Succeeds()
+        public void CreatedAt_CanBeSetAndRetrieved()
         {
             var aggregate = new TestAggregateRoot(1);
-            var updater = "test.updater";
-
-            var result = aggregate.SetUpdatedBy(updater);
-
-            result.IsError.ShouldBeFalse();
-            aggregate.UpdatedBy.ShouldBe(updater);
-            aggregate.UpdatedAt.ShouldNotBeNull();
-            aggregate.Version.ShouldBe(2);
+            var date = new DateTimeOffset(2023, 1, 1, 0, 0, 0, TimeSpan.Zero);
+            aggregate.CreatedAt = date;
+            aggregate.CreatedAt.ShouldBe(date);
         }
 
         [Fact]
-        public void SetUpdatedBy_WhenDeleted_Fails()
+        public void UpdatedAt_CanBeSetAndRetrieved()
         {
             var aggregate = new TestAggregateRoot(1);
-            aggregate.Delete("test.user");
-            var initialVersion = aggregate.Version;
-
-            var result = aggregate.SetUpdatedBy("new.user");
-
-            result.IsError.ShouldBeTrue();
-            result.FirstError.Type.ShouldBe(ErrorType.Conflict);
-            result.FirstError.Code.ShouldBe("AggregateRoot.Deleted");
-            aggregate.Version.ShouldBe(initialVersion);
-        }
-
-        [Fact]
-        public void TrackChange_WhenNoCreator_SetsCreatedBy()
-        {
-            var aggregate = new TestAggregateRoot(1);
-            var user = "test.user";
-
-            aggregate.TrackChange(user);
-
-            aggregate.CreatedBy.ShouldBe(user);
-            aggregate.UpdatedBy.ShouldBeNull();
-            aggregate.Version.ShouldBe(2);
-        }
-
-        [Fact]
-        public void TrackChange_WhenHasCreator_SetsUpdatedBy()
-        {
-            var aggregate = new TestAggregateRoot(1);
-            aggregate.SetCreatedBy("creator");
-            var updater = "updater";
-
-            aggregate.TrackChange(updater);
-
-            aggregate.CreatedBy.ShouldBe("creator");
-            aggregate.UpdatedBy.ShouldBe(updater);
-            aggregate.Version.ShouldBe(3);
+            var date = new DateTimeOffset(2023, 1, 1, 0, 0, 0, TimeSpan.Zero);
+            aggregate.UpdatedAt = date;
+            aggregate.UpdatedAt.ShouldBe(date);
         }
     }
+    #endregion
 
+    #region Domain Event Tests
     public class DomainEventTests
     {
         [Fact]
-        public void AddDomainEvent_WhenNotDeleted_Succeeds()
+        public void AddDomainEvent_WithValidEvent_AddsToList()
         {
             var aggregate = new TestAggregateRoot(1);
-            var @event = new TestEvent();
-
-            var result = aggregate.AddDomainEvent(@event);
+            var domainEvent = new TestEvent();
+            var result = aggregate.AddDomainEvent(domainEvent);
 
             result.IsError.ShouldBeFalse();
-            aggregate.DomainEvents.ShouldContain(@event);
-            aggregate.Version.ShouldBe(2);
+            aggregate.DomainEvents.Count.ShouldBe(1);
+            aggregate.DomainEvents.ShouldContain(domainEvent);
         }
 
         [Fact]
-        public void AddDomainEvent_WhenDeleted_Fails()
+        public void AddDomainEvent_WithNullEvent_ReturnsError()
         {
             var aggregate = new TestAggregateRoot(1);
-            aggregate.Delete("test.user");
-            var initialVersion = aggregate.Version;
-
-            var result = aggregate.AddDomainEvent(new TestEvent());
-
-            result.IsError.ShouldBeTrue();
-            result.FirstError.Type.ShouldBe(ErrorType.Conflict);
-            result.FirstError.Code.ShouldBe("AggregateRoot.Deleted");
-            aggregate.Version.ShouldBe(initialVersion);
-        }
-
-        [Fact]
-        public void AddDomainEvent_WhenEventIsNull_Fails()
-        {
-            var aggregate = new TestAggregateRoot(1);
-            var initialVersion = aggregate.Version;
-
             var result = aggregate.AddDomainEvent(null!);
 
             result.IsError.ShouldBeTrue();
-            result.FirstError.Type.ShouldBe(ErrorType.Validation);
             result.FirstError.Code.ShouldBe("AggregateRoot.NullEvent");
-            aggregate.Version.ShouldBe(initialVersion);
-        }
-
-        private class TestEvent : IDomainEvent { }
-    }
-
-    public class SoftDeleteTests
-    {
-        [Fact]
-        public void Delete_WhenNotDeleted_Succeeds()
-        {
-            // Arrange
-            var aggregate = new TestAggregateRoot(1);
-            var deleter = "test.user";
-            var beforeDelete = DateTimeOffset.UtcNow;
-
-            // Act
-            var result = aggregate.Delete(deleter);
-
-            // Assert
-            if (result.IsError)
-            {
-                throw new XunitException($"Delete failed with error: {result.FirstError}");
-            }
-
-            result.Value.ShouldBe(Result.Deleted);
-            aggregate.IsDeleted.ShouldBeTrue();
-            aggregate.DeletedAt.ShouldNotBeNull();
-            aggregate.DeletedAt.Value.ShouldBeGreaterThan(beforeDelete);
-            aggregate.DeletedBy.ShouldBe(deleter);
-            aggregate.UpdatedBy.ShouldBe(deleter);
-            aggregate.Version.ShouldBe(2);
+            aggregate.DomainEvents.Count.ShouldBe(0);
         }
 
         [Fact]
-        public void Delete_WhenAlreadyDeleted_Fails()
+        public void ClearDomainEvents_RemovesAllEvents()
         {
-            // Arrange
             var aggregate = new TestAggregateRoot(1);
-            var firstDeleteResult = aggregate.Delete("test.user");
+            var domainEvent = new TestEvent();
+            aggregate.AddDomainEvent(domainEvent);
 
-            if (firstDeleteResult.IsError)
-            {
-                throw new XunitException($"First delete failed with error: {firstDeleteResult.FirstError}");
-            }
+            var result = aggregate.ClearDomainEvents();
 
-            var initialVersion = aggregate.Version;
-
-            // Act
-            var result = aggregate.Delete("new.user");
-
-            // Assert
-            result.IsError.ShouldBeTrue();
-            result.FirstError.Type.ShouldBe(ErrorType.Conflict);
-            result.FirstError.Code.ShouldBe("AggregateRoot.AlreadyDeleted");
-            aggregate.Version.ShouldBe(initialVersion);
-        }
-
-        [Fact]
-        public void Delete_UpdatesAllRelevantProperties()
-        {
-            // Arrange
-            var aggregate = new TestAggregateRoot(1);
-            var deleter = "test.user";
-            var beforeDelete = DateTimeOffset.UtcNow;
-
-            // Act
-            var result = aggregate.Delete(deleter);
-
-            // Assert
-            if (result.IsError)
-            {
-                throw new XunitException($"Delete failed with error: {result.FirstError}");
-            }
-
-            aggregate.IsDeleted.ShouldBeTrue();
-            aggregate.DeletedAt.ShouldNotBeNull();
-            aggregate.DeletedAt.Value.ShouldBeGreaterThan(beforeDelete);
-            aggregate.DeletedBy.ShouldBe(deleter);
-            aggregate.UpdatedBy.ShouldBe(deleter);
-            aggregate.UpdatedAt.ShouldNotBeNull();
-            aggregate.UpdatedAt.Value.ShouldBeGreaterThan(beforeDelete);
-            aggregate.Version.ShouldBeGreaterThan(1);
-        }
-
-        [Fact]
-        public void Delete_SetsUpdatedByAndDeletedByToSameUser()
-        {
-            // Arrange
-            var aggregate = new TestAggregateRoot(1);
-            var deleter = "test.user";
-
-            // Act
-            var result = aggregate.Delete(deleter);
-
-            // Assert
-            if (result.IsError)
-            {
-                throw new XunitException($"Delete failed with error: {result.FirstError}");
-            }
-
-            aggregate.DeletedBy.ShouldBe(deleter);
-            aggregate.UpdatedBy.ShouldBe(deleter);
-        }
-
-        [Theory]
-        [InlineData(null)]
-        [InlineData("test.user")]
-        public void Delete_AcceptsNullAndNonNullDeleter(string? deleter)
-        {
-            // Arrange
-            var aggregate = new TestAggregateRoot(1);
-
-            // Act
-            var result = aggregate.Delete(deleter);
-
-            // Assert
             result.IsError.ShouldBeFalse();
-            aggregate.IsDeleted.ShouldBeTrue();
-            aggregate.DeletedBy.ShouldBe(deleter);
-            aggregate.UpdatedBy.ShouldBe(deleter);
+            aggregate.DomainEvents.Count.ShouldBe(0);
         }
     }
+    #endregion
 
-
-    public class InheritanceTests
+    #region Equality Tests (Inherited from Entity)
+    public class EqualityTests
     {
         [Fact]
-        public void ImplementsRequiredInterfaces()
+        public void Equals_SameIdAndType_ReturnsTrue()
+        {
+            var aggregate1 = new TestAggregateRoot(1);
+            var aggregate2 = new TestAggregateRoot(1);
+
+            aggregate1.Equals(aggregate2).ShouldBeTrue();
+            (aggregate1 == aggregate2).ShouldBeTrue();
+            aggregate1.GetHashCode().ShouldBe(aggregate2.GetHashCode());
+        }
+
+        [Fact]
+        public void Equals_DifferentId_ReturnsFalse()
+        {
+            var aggregate1 = new TestAggregateRoot(1);
+            var aggregate2 = new TestAggregateRoot(2);
+
+            aggregate1.Equals(aggregate2).ShouldBeFalse();
+            (aggregate1 != aggregate2).ShouldBeTrue();
+            aggregate1.GetHashCode().ShouldNotBe(aggregate2.GetHashCode());
+        }
+
+        [Fact]
+        public void Equals_DifferentType_ReturnsFalse()
+        {
+            var aggregate1 = new TestAggregateRoot(1);
+            var aggregate2 = new DifferentTestAggregateRoot(1);
+
+            aggregate1.Equals(aggregate2).ShouldBeFalse();
+            (aggregate1 != aggregate2).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Equals_Null_ReturnsFalse()
         {
             var aggregate = new TestAggregateRoot(1);
 
-            aggregate.ShouldBeAssignableTo<Entity<int>>();
-            aggregate.ShouldBeAssignableTo<IActionTrackable>();
-            aggregate.ShouldBeAssignableTo<IDeletableEntity>();
-            aggregate.ShouldBeAssignableTo<IVersionable>();
+            aggregate.Equals(null).ShouldBeFalse();
+            (aggregate == null).ShouldBeFalse();
+            (null != aggregate).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Equals_SameReference_ReturnsTrue()
+        {
+            var aggregate = new TestAggregateRoot(1);
+
+            aggregate.Equals(aggregate).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void GetHashCode_SameIdAndType_ReturnsSameHash()
+        {
+            var aggregate1 = new TestAggregateRoot(1);
+            var aggregate2 = new TestAggregateRoot(1);
+
+            aggregate1.GetHashCode().ShouldBe(aggregate2.GetHashCode());
+        }
+
+        [Fact]
+        public void GetHashCode_DifferentId_ReturnsDifferentHash()
+        {
+            var aggregate1 = new TestAggregateRoot(1);
+            var aggregate2 = new TestAggregateRoot(2);
+
+            aggregate1.GetHashCode().ShouldNotBe(aggregate2.GetHashCode());
         }
     }
+    #endregion
 }

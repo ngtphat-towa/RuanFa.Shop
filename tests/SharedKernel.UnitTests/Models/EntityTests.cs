@@ -1,4 +1,5 @@
-﻿using RuanFa.Shop.SharedKernel.Interfaces;
+﻿using ErrorOr;
+using RuanFa.Shop.SharedKernel.Interfaces;
 using RuanFa.Shop.SharedKernel.Models;
 
 namespace RuanFa.Shop.SharedKernel.UnitTests.Models;
@@ -12,120 +13,81 @@ public class EntityTests
         public TestEntity() : base() { }
         public TestEntity(int id) : base(id) { }
 
-        public void UpdateTime() => UpdateModificationTime();
+        // Helper methods for testing - exposing the results directly
+        public ErrorOr<Success> AddTestEvent(IDomainEvent domainEvent) => AddDomainEvent(domainEvent);
+        public ErrorOr<Success> ClearTestEvents() => ClearDomainEvents();
     }
 
-    private class DifferentTestEntity : Entity<int>
+    private class DifferentTestEntity(int id) : Entity<int>(id)
     {
-        public DifferentTestEntity(int id) : base(id) { }
     }
 
+    #region Constructor Tests
     public class ConstructorTests
     {
         [Fact]
         public void DefaultConstructor_InitializesEmptyDomainEvents()
         {
             var entity = new TestEntity();
-
             entity.DomainEvents.ShouldNotBeNull();
             entity.DomainEvents.Count.ShouldBe(0);
         }
 
         [Fact]
-        public void IdConstructor_SetsIdAndCreatedAt()
+        public void IdConstructor_SetsId()
         {
             var entity = new TestEntity(42);
-
             entity.Id.ShouldBe(42);
-            entity.CreatedAt.ShouldNotBe(default);
-            entity.UpdatedAt.ShouldBeNull();
         }
     }
+    #endregion
 
+    #region Domain Event Tests
     public class DomainEventTests
     {
         [Fact]
-        public void AddDomainEvent_AddsEventToList()
+        public void AddDomainEvent_WithValidEvent_AddsToList()
         {
-            var entity = new TestEntity(1);
+            var entity = new TestEntity();
             var domainEvent = new TestEvent();
+            var result = entity.AddTestEvent(domainEvent);
 
-            entity.AddDomainEvent(domainEvent);
-
+            result.IsError.ShouldBeFalse();
             entity.DomainEvents.Count.ShouldBe(1);
-            entity.DomainEvents.First().ShouldBe(domainEvent);
+            entity.DomainEvents.ShouldContain(domainEvent);
         }
 
         [Fact]
-        public void AddDomainEvent_ThrowsWhenEventIsNull()
+        public void AddDomainEvent_WithNullEvent_ReturnsError()
         {
-            var entity = new TestEntity(1);
+            var entity = new TestEntity();
+            var result = entity.AddTestEvent(null!);
 
-            Should.Throw<ArgumentNullException>(() => entity.AddDomainEvent(null!));
+            result.IsError.ShouldBeTrue();
+            result.FirstError.Code.ShouldBe("DomainEvent.Null");
+            entity.DomainEvents.Count.ShouldBe(0);
         }
 
         [Fact]
         public void ClearDomainEvents_RemovesAllEvents()
         {
-            var entity = new TestEntity(1);
-            entity.AddDomainEvent(new TestEvent());
-            entity.AddDomainEvent(new TestEvent());
+            var entity = new TestEntity();
+            var domainEvent = new TestEvent();
+            entity.AddTestEvent(domainEvent);
 
-            entity.ClearDomainEvents();
+            var result = entity.ClearTestEvents();
 
+            result.IsError.ShouldBeFalse();
             entity.DomainEvents.Count.ShouldBe(0);
         }
     }
+    #endregion
 
-    public class AuditableTests
-    {
-        [Fact]
-        public void UpdateModificationTime_SetsUpdatedAt()
-        {
-            var entity = new TestEntity(1);
-            entity.UpdateTime();
-
-            entity.UpdatedAt.ShouldNotBeNull();
-            entity.UpdatedAt.Value.ShouldBeInRange(
-                DateTimeOffset.UtcNow.AddSeconds(-1),
-                DateTimeOffset.UtcNow.AddSeconds(1));
-        }
-    }
-
+    #region Equality Tests
     public class EqualityTests
     {
         [Fact]
-        public void Equals_WhenSameReference_ReturnsTrue()
-        {
-            // Original had entity compared to itself
-            var entity1 = new TestEntity(1);
-            var entity2 = entity1;
-
-            entity1.Equals(entity2).ShouldBeTrue();
-            (entity1 == entity2).ShouldBeTrue();
-        }
-        [Fact]
-        public void Equals_WhenNull_ReturnsFalse()
-        {
-            var entity = new TestEntity(1);
-
-            entity.Equals(null).ShouldBeFalse();
-            (entity == null).ShouldBeFalse();
-            (null == entity).ShouldBeFalse();
-        }
-
-        [Fact]
-        public void Equals_WhenSameIdButDifferentTypes_ReturnsFalse()
-        {
-            var entity1 = new TestEntity(1);
-            var entity2 = new DifferentTestEntity(1);
-
-            entity1.Equals(entity2).ShouldBeFalse();
-            (entity1 == entity2).ShouldBeFalse();
-        }
-
-        [Fact]
-        public void Equals_WhenSameTypeAndId_ReturnsTrue()
+        public void Equals_SameIdAndType_ReturnsTrue()
         {
             var entity1 = new TestEntity(1);
             var entity2 = new TestEntity(1);
@@ -135,7 +97,7 @@ public class EntityTests
         }
 
         [Fact]
-        public void Equals_WhenDifferentIds_ReturnsFalse()
+        public void Equals_DifferentId_ReturnsFalse()
         {
             var entity1 = new TestEntity(1);
             var entity2 = new TestEntity(2);
@@ -145,33 +107,24 @@ public class EntityTests
         }
 
         [Fact]
-        public void GetHashCode_ReturnsSameValueForEqualEntities()
+        public void Equals_DifferentType_ReturnsFalse()
         {
             var entity1 = new TestEntity(1);
-            var entity2 = new TestEntity(1);
+            var entity2 = new DifferentTestEntity(1);
 
-            entity1.GetHashCode().ShouldBe(entity2.GetHashCode());
+            entity1.Equals(entity2).ShouldBeFalse();
+            (entity1 != entity2).ShouldBeTrue();
         }
 
         [Fact]
-        public void GetHashCode_ReturnsDifferentValuesForDifferentEntities()
+        public void Equals_Null_ReturnsFalse()
         {
-            var entity1 = new TestEntity(1);
-            var entity2 = new TestEntity(2);
-
-            entity1.GetHashCode().ShouldNotBe(entity2.GetHashCode());
-        }
-
-        [Fact]
-        public void Operators_HandleNullValues()
-        {
-            TestEntity? nullEntity = null;
             var entity = new TestEntity(1);
 
-            (nullEntity == null).ShouldBeTrue();
-            (null == nullEntity).ShouldBeTrue();
-            (entity != null).ShouldBeTrue();
+            entity.Equals(null).ShouldBeFalse();
+            (entity == null).ShouldBeFalse();
             (null != entity).ShouldBeTrue();
         }
     }
+    #endregion
 }
