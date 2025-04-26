@@ -3,11 +3,10 @@ using ErrorOr;
 using RuanFa.Shop.Domain.Todo.Entities;
 using RuanFa.Shop.Domain.Todo.Errors;
 using RuanFa.Shop.Domain.Todo.ValueObjects;
-using RuanFa.Shop.SharedKernel.Interfaces;
 using RuanFa.Shop.SharedKernel.Models;
 
 namespace RuanFa.Shop.Domain.Todo;
-public class TodoList : AggregateRoot<int>, IPersistable
+public class TodoList : AggregateRoot<int>
 {
     #region
     public bool EnableSoftDelete => false;
