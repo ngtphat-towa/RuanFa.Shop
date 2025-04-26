@@ -1,83 +1,72 @@
-﻿using RuanFa.Shop.SharedKernel.Interfaces;
+﻿using ErrorOr;
+using RuanFa.Shop.SharedKernel.Interfaces;
+using System;
+using System.Collections.Generic;
 
 namespace RuanFa.Shop.SharedKernel.Models;
-public abstract class Entity<TId> :
-    IAuditable,
-    IHasDomainEvent,
-    IEquatable<Entity<TId>> where TId : notnull
+
+public abstract class Entity<TId> : IAuditable, IHasDomainEvent, IEquatable<Entity<TId>> where TId : notnull
 {
+    #region Fields
     private readonly List<IDomainEvent> _domainEvents = [];
+    #endregion
 
+    #region Properties
     public TId Id { get; protected set; } = default!;
-
-    // Auditable properties
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }
-
-    // Domain Events
+    public string? CreatedBy { get; set; }
+    public string? UpdatedBy { get; set; }
     public IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
+    #endregion
 
-    protected Entity() { }
+    #region Constructors
+    protected Entity()
+    {
+    }
 
     protected Entity(TId id)
     {
         Id = id;
-        CreatedAt = DateTimeOffset.UtcNow;
     }
+    #endregion
 
-    public void AddDomainEvent(IDomainEvent domainEvent)
+    #region Domain Events
+    public ErrorOr<Success> AddDomainEvent(IDomainEvent domainEvent)
     {
-        ArgumentNullException.ThrowIfNull(domainEvent);
+        if (domainEvent is null)
+            return Error.Validation("DomainEvent.Null", "Domain event cannot be null");
+
         _domainEvents.Add(domainEvent);
+        return Result.Success;
     }
 
-    public void ClearDomainEvents()
+    public ErrorOr<Success> ClearDomainEvents()
     {
         _domainEvents.Clear();
+        return Result.Success;
     }
+    #endregion
 
-    protected void UpdateModificationTime()
-    {
-        UpdatedAt = DateTimeOffset.UtcNow;
-    }
-
+    #region Equality
     public bool Equals(Entity<TId>? other)
     {
-        if (other is null)
-            return false;
-
-        if (ReferenceEquals(this, other))
-            return true;
-
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
         return GetType() == other.GetType() && Id.Equals(other.Id);
     }
 
     public override bool Equals(object? obj)
     {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
         return Equals(obj as Entity<TId>);
     }
 
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(GetType(), Id);
-    }
+    public override int GetHashCode() => HashCode.Combine(GetType(), Id);
 
-    public static bool operator ==(Entity<TId>? left, Entity<TId>? right)
-    {
-        return left?.Equals(right) ?? right is null;
-    }
-
-    public static bool operator !=(Entity<TId>? left, Entity<TId>? right)
-    {
-        return !(left == right);
-    }
+    public static bool operator ==(Entity<TId>? left, Entity<TId>? right) => left?.Equals(right) ?? right is null;
+    public static bool operator !=(Entity<TId>? left, Entity<TId>? right) => !(left == right);
+    #endregion
 }
