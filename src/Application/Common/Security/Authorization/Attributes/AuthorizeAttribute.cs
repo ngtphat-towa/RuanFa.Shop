@@ -22,8 +22,8 @@ public sealed class ApiAuthorizeAttribute : AuthorizeAttribute
         Policy = BuildPolicy();
     }
 
-    public string? Permissions { get; }
-    public string? Policies { get; }
+    public string? Permissions { get; set; }
+    public string? Policies { get; set; }
 
     private string BuildPolicy()
     {
