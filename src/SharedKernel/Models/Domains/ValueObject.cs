@@ -1,4 +1,4 @@
-﻿namespace RuanFa.Shop.SharedKernel.Models;
+﻿namespace RuanFa.Shop.SharedKernel.Models.Domains;
 
 public abstract class ValueObject : IEquatable<ValueObject>, IComparable<ValueObject>
 {
@@ -14,7 +14,7 @@ public abstract class ValueObject : IEquatable<ValueObject>, IComparable<ValueOb
 
     protected static bool NotEqualOperator(ValueObject? left, ValueObject? right)
     {
-        return !(EqualOperator(left, right));
+        return !EqualOperator(left, right);
     }
 
     protected abstract IEnumerable<object?> GetEqualityComponents();

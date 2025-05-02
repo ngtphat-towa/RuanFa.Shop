@@ -1,13 +1,13 @@
 ﻿using ErrorOr;
-using RuanFa.Shop.SharedKernel.Interfaces;
+using RuanFa.Shop.SharedKernel.Interfaces.Domains;
 
-namespace RuanFa.Shop.SharedKernel.Models;
+namespace RuanFa.Shop.SharedKernel.Models.Domains;
 
 public abstract class AggregateRoot<TId> : Entity<TId> where TId : notnull
 {
     #region Constructors
     protected AggregateRoot() : base() { }
-    
+
     protected AggregateRoot(TId id) : base(id) { }
     #endregion
 
@@ -25,7 +25,7 @@ public abstract class AggregateRoot<TId> : Entity<TId> where TId : notnull
     {
         if (domainEvent is null)
             return Errors.DomainEventNull;
-            
+        
         base.AddDomainEvent(domainEvent);
         return Result.Success;
     }

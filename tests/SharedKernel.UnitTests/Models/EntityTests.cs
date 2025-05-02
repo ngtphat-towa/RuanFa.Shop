@@ -1,6 +1,6 @@
 ﻿using ErrorOr;
-using RuanFa.Shop.SharedKernel.Interfaces;
-using RuanFa.Shop.SharedKernel.Models;
+using RuanFa.Shop.SharedKernel.Interfaces.Domains;
+using RuanFa.Shop.SharedKernel.Models.Domains;
 
 namespace RuanFa.Shop.SharedKernel.UnitTests.Models;
 

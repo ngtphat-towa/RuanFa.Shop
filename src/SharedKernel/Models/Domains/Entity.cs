@@ -1,9 +1,7 @@
 ﻿using ErrorOr;
-using RuanFa.Shop.SharedKernel.Interfaces;
-using System;
-using System.Collections.Generic;
+using RuanFa.Shop.SharedKernel.Interfaces.Domains;
 
-namespace RuanFa.Shop.SharedKernel.Models;
+namespace RuanFa.Shop.SharedKernel.Models.Domains;
 
 public abstract class Entity<TId> : IAuditable, IHasDomainEvent, IEquatable<Entity<TId>> where TId : notnull
 {
@@ -13,8 +11,8 @@ public abstract class Entity<TId> : IAuditable, IHasDomainEvent, IEquatable<Enti
 
     #region Properties
     public TId Id { get; protected set; } = default!;
-    public DateTimeOffset CreatedAt { get; set; }
-    public DateTimeOffset? UpdatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
     public string? CreatedBy { get; set; }
     public string? UpdatedBy { get; set; }
     public IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();

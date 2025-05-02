@@ -1,8 +1,5 @@
-﻿using ErrorOr;
-using RuanFa.Shop.SharedKernel.Interfaces;
-using RuanFa.Shop.SharedKernel.Models;
-using Shouldly;
-using Xunit;
+﻿using RuanFa.Shop.SharedKernel.Interfaces.Domains;
+using RuanFa.Shop.SharedKernel.Models.Domains;
 
 namespace RuanFa.Shop.SharedKernel.UnitTests.Models;
 
@@ -16,9 +13,8 @@ public class AggregateRootTests
         public void SetUpdatedBy(string updatedBy) => UpdatedBy = updatedBy;
     }
 
-    private class DifferentTestAggregateRoot : AggregateRoot<int>
+    private class DifferentTestAggregateRoot(int id) : AggregateRoot<int>(id)
     {
-        public DifferentTestAggregateRoot(int id) : base(id) { }
     }
 
     private class TestEvent : IDomainEvent { }
@@ -77,7 +73,7 @@ public class AggregateRootTests
         public void CreatedAt_CanBeSetAndRetrieved()
         {
             var aggregate = new TestAggregateRoot(1);
-            var date = new DateTimeOffset(2023, 1, 1, 0, 0, 0, TimeSpan.Zero);
+            var date = new DateTime(2023, 1, 1, 0, 0, 0);
             aggregate.CreatedAt = date;
             aggregate.CreatedAt.ShouldBe(date);
         }
@@ -86,7 +82,7 @@ public class AggregateRootTests
         public void UpdatedAt_CanBeSetAndRetrieved()
         {
             var aggregate = new TestAggregateRoot(1);
-            var date = new DateTimeOffset(2023, 1, 1, 0, 0, 0, TimeSpan.Zero);
+            var date = new DateTime(2023, 1, 1, 0, 0, 0);
             aggregate.UpdatedAt = date;
             aggregate.UpdatedAt.ShouldBe(date);
         }
