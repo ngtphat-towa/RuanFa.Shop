@@ -10,7 +10,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Commons\Erorrs\" />
+    <None Include="Todo\Errors\DomainErrors.TodoList..cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" />
   </ItemGroup>
 
 </Project>

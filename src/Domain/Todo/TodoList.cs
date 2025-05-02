@@ -1,20 +1,15 @@
 ﻿using System.Collections.ObjectModel;
-using ErrorOr;
 using RuanFa.Shop.Domain.Todo.Entities;
-using RuanFa.Shop.Domain.Todo.Errors;
 using RuanFa.Shop.Domain.Todo.ValueObjects;
-using RuanFa.Shop.SharedKernel.Models;
+using RuanFa.Shop.SharedKernel.Models.Domains;
 
 namespace RuanFa.Shop.Domain.Todo;
+
 public class TodoList : AggregateRoot<int>
 {
-    #region
-    public bool EnableSoftDelete => false;
-    public bool EnableVersioning => true;
-    #endregion
     #region Properties
     public string Title { get; private set; }
-    public Colour Colour { get; private set; }
+    public Colour? Colour { get; private set; }
     private readonly List<TodoItem> _items = new();
     public IReadOnlyList<TodoItem> Items => new ReadOnlyCollection<TodoItem>(_items);
 
@@ -22,7 +17,7 @@ public class TodoList : AggregateRoot<int>
     #endregion
 
     #region Constructor
-    private TodoList(string title, Colour colour)
+    private TodoList(string title, Colour? colour)
     {
         Title = title;
         Colour = colour;
@@ -30,39 +25,24 @@ public class TodoList : AggregateRoot<int>
     #endregion
 
     #region Factory Method
-    public static ErrorOr<TodoList> Create(string title, Colour colour)
+    public static TodoList Create(string title, Colour? colour)
     {
-        if (string.IsNullOrWhiteSpace(title))
-        {
-            return DomainErrors.TodoList.InvalidTitle;
-        }
-
         return new TodoList(title.Trim(), colour);
     }
     #endregion
 
     #region Methods
-    public ErrorOr<Updated> UpdateTitle(string newTitle)
+    public TodoList Update(string? newTitle, Colour? colour)
     {
-        if (string.IsNullOrWhiteSpace(newTitle))
-        {
-            return DomainErrors.TodoList.InvalidTitle;
-        }
+        Title = newTitle ?? Title;
+        Colour = colour;
 
-        Title = newTitle.Trim();
-        return Result.Updated;
+        return this;
     }
 
-    public ErrorOr<Updated> UpdateColour(Colour newColour)
-    {
-        Colour = newColour;
-        return Result.Updated;
-    }
-
-    public ErrorOr<Created> AddItem(TodoItem item)
+    public void AddItem(TodoItem item)
     {
         _items.Add(item);
-        return Result.Created;
     }
 
     public void RemoveItem(int itemId)

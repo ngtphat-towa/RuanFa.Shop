@@ -1,10 +1,9 @@
 ﻿using RuanFa.Shop.Domain.Todo.Entities;
-using RuanFa.Shop.SharedKernel.Models;
+using RuanFa.Shop.SharedKernel.Models.Domains;
 
 namespace RuanFa.Shop.Domain.Todo.Events;
-public sealed class TodoItemCreatedEvent : DomainEvent
-{
-    public TodoItemCreatedEvent(TodoItem item) => Item = item;
 
-    public TodoItem Item { get; }
+public sealed class TodoItemCreatedEvent(TodoItem item) : DomainEvent
+{
+    public TodoItem Item { get; } = item;
 }

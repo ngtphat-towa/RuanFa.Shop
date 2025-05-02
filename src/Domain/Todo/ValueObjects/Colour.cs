@@ -1,8 +1,9 @@
 ﻿using ErrorOr;
 using RuanFa.Shop.Domain.Todo.Errors;
-using RuanFa.Shop.SharedKernel.Models;
+using RuanFa.Shop.SharedKernel.Models.Domains;
 
 namespace RuanFa.Shop.Domain.Todo.ValueObjects;
+
 public class Colour(string code) : ValueObject
 {
     public static ErrorOr<Colour> Create(string? code)

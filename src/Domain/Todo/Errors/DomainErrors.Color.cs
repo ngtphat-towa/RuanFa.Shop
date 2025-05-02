@@ -1,6 +1,7 @@
 ﻿using ErrorOr;
 
 namespace RuanFa.Shop.Domain.Todo.Errors;
+
 public static partial class DomainErrors
 {
     public static class Colour
