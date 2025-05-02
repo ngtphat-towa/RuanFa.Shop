@@ -1,0 +1,13 @@
+﻿namespace RuanFa.Shop.Application.Common.Security.Permissions;
+
+public static partial class Permission
+{
+    public static class TodoItem
+    {
+        public const string Create = "create:todo-item";
+        public const string Update = "update:todo-item";
+        public const string Get = "get:todo-item";
+        public const string Dismiss = "dismiss:todo-item";
+        public const string Delete = "delete:todo-item";
+    }
+}
