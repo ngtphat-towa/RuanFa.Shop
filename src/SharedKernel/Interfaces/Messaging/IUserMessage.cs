@@ -8,7 +8,7 @@ public interface IUserMessage
     /// <summary>
     /// The ID of the user associated with the message.
     /// </summary>
-    string UserId { get; set; }
+    Guid UserId { get; set; }
 }
 
 /// <summary>

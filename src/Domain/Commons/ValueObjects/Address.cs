@@ -20,4 +20,23 @@ public class Address : ValueObject
         yield return State;
         yield return City;
     }
+
+    public static Address CreateAddress(
+       string addressLine1,
+       string? addressLine2,
+       string city,
+       string state,
+       string country,
+       string postalCode)
+    {
+        return new Address
+        {
+            AddressLine1 = addressLine1,
+            AddressLine2 = addressLine2,
+            City = city,
+            State = state,
+            Country = country,
+            PostalCode = postalCode
+        };
+    }
 }
