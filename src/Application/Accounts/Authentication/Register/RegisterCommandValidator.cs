@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using RuanFa.Shop.Application.Accounts.Validation;
+using RuanFa.Shop.Application.Common.Services;
 using RuanFa.Shop.Domain.Accounts.Errors;
 using RuanFa.Shop.Domain.Commons.Enums;
 
@@ -9,7 +10,7 @@ internal class RegisterCommandValidator : AbstractValidator<RegisterCommand>
 {
     private readonly UserAddressValidator _userAddressValidator;
 
-    public RegisterCommandValidator()
+    public RegisterCommandValidator(IDateTimeProvider dateTimeProvider)
     {
         _userAddressValidator = new UserAddressValidator();
 
@@ -57,7 +58,7 @@ internal class RegisterCommandValidator : AbstractValidator<RegisterCommand>
 
         // DateOfBirth validation (optional)
         When(x => x.DateOfBirth.HasValue, () => RuleFor(x => x.DateOfBirth)
-                .Must(dob => dob!.Value < DateTime.Now.AddYears(-18) && dob.Value > DateTime.Now.AddYears(-120))
+                .Must(dob => dob!.Value < dateTimeProvider.UtcNow.AddYears(-18) && dob.Value > dateTimeProvider.UtcNow.AddYears(-120))
                 .WithMessage(DomainErrors.Account.InvalidDateOfBirth.Description)
                 .WithErrorCode(DomainErrors.Account.InvalidDateOfBirth.Code));
 

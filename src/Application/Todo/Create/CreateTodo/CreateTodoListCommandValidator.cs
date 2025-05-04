@@ -1,8 +1,11 @@
-﻿using FluentValidation;
+﻿using RuanFa.Shop.Application.Common.Security.Authorization.Attributes;
+using RuanFa.Shop.Application.Common.Security.Permissions;
+using FluentValidation;
 using RuanFa.Shop.Domain.Todo.Errors;
 
 namespace RuanFa.Shop.Application.Todo.Create.CreateTodo;
 
+[ApiAuthorize(Permission.TodoItem.Create)]
 internal class CreateTodoListCommandValidator : AbstractValidator<CreateTodoListCommand>
 {
     public CreateTodoListCommandValidator()

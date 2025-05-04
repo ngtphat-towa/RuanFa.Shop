@@ -1,8 +1,7 @@
 ﻿using FluentValidation;
-using RuanFa.Shop.Application.Accounts.Emails.Confirm;
 using RuanFa.Shop.Domain.Accounts.Errors;
 
-namespace RuanFa.Shop.Application.Accounts.Authentication;
+namespace RuanFa.Shop.Application.Accounts.Emails.Confirm;
 
 internal class ConfirmEmailCommandValidator : AbstractValidator<ConfirmEmailCommand>
 {
