@@ -2,7 +2,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using RuanFa.Shop.Application.Accounts.Emails.Resend;
-using RuanFa.Shop.Application.Accounts.Emails.Update;
 using RuanFa.Shop.Application.Accounts.Emails.Confirm;
 using RuanFa.Shop.Web.Api.Extensions;
 

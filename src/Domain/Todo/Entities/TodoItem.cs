@@ -26,7 +26,7 @@ public class TodoItem : Entity<int>
             _done = value;
         }
     }
-    public DateTime? DoneAt { get; set; }
+    public DateTimeOffset? DoneAt { get; set; }
     #endregion
 
     #region Relationship
@@ -76,7 +76,7 @@ public class TodoItem : Entity<int>
         return Result.Updated;
     }
 
-    public ErrorOr<Updated> UpdateStatus(bool isDone, DateTime doneAt)
+    public ErrorOr<Updated> UpdateStatus(bool isDone, DateTimeOffset doneAt)
     {
         if (CreatedAt > doneAt)
         {

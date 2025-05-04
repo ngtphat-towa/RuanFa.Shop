@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace RuanFa.Shop.Infrastructure.Data.Configurations.Extensions;
+namespace RuanFa.Shop.Infrastructure.Data.Converters;
 
 internal static class FluentApiExtensions
 {

@@ -65,8 +65,8 @@ public class FluentStorageService : IStorageService
         try
         {
             // Create path structure: yyyy/MM/dd/filename
-            string dateFolder = DateTime.UtcNow.ToString("yyyy/MM/dd");
-            string safeFileName = $"{DateTime.UtcNow.Ticks}_{Guid.NewGuid():N}{extension}";
+            string dateFolder = DateTimeOffset.UtcNow.ToString("yyyy/MM/dd");
+            string safeFileName = $"{DateTimeOffset.UtcNow.Ticks}_{Guid.NewGuid():N}{extension}";
             string blobPath = path != null
                 ? Path.Combine(path, dateFolder, safeFileName).Replace("\\", "/")
                 : Path.Combine(dateFolder, safeFileName).Replace("\\", "/");

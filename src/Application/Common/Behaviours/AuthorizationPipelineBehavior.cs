@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace RuanFa.Shop.Application.Common.Behaviours;
 
-internal sealed class AuthorizationPipelineBehavior<TRequest, TResponse>(IAuthorizationService authorizationService) : IPipelineBehavior<TRequest, TResponse>
+public sealed class AuthorizationPipelineBehavior<TRequest, TResponse>(IAuthorizationService authorizationService) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
     where TResponse : IErrorOr
 {
@@ -23,7 +23,7 @@ internal sealed class AuthorizationPipelineBehavior<TRequest, TResponse>(IAuthor
         // Skip authorization if the response type is not ErrorOr
         if (!typeof(IErrorOr).IsAssignableFrom(typeof(TResponse)))
         {
-            return await next(cancellationToken);
+            return await next();
         }
 
         // Get authorization attributes from the request type
@@ -51,7 +51,7 @@ internal sealed class AuthorizationPipelineBehavior<TRequest, TResponse>(IAuthor
         if (requiredRoles.Count == 0 && requiredPermissions.Count == 0 && requiredPolicies.Count == 0)
         {
             // No attributes and not IUserMessage, proceed without authorization
-            return await next(cancellationToken);
+            return await next();
         }
 
         // Perform authorization
@@ -80,6 +80,6 @@ internal sealed class AuthorizationPipelineBehavior<TRequest, TResponse>(IAuthor
             return (TResponse)(dynamic)authResult.Errors;
         }
 
-        return await next(cancellationToken);
+        return await next();
     }
 }

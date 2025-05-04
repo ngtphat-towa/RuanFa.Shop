@@ -1,7 +1,7 @@
 ﻿namespace RuanFa.Shop.Application.Common.Security.Authorization.Models;
 
 public record CurrentUser(
-    string UserId,
+    Guid UserId,
     string Email,
     IReadOnlyList<string> Permissions,
     IReadOnlyList<string> Roles);

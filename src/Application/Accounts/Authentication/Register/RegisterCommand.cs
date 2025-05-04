@@ -11,13 +11,14 @@ namespace RuanFa.Shop.Application.Accounts.Authentication.Register;
 public class RegisterCommand : ICommand<AccountInfoResult>
 {
     public string Email { get;  set; } = string.Empty;
+    public string? Username { get;  set; } = string.Empty;
     public string Password { get;  set; } = string.Empty;
     public string FullName { get;  set; } = string.Empty;
     public string? PhoneNumber { get;  set; }
     public GenderType Gender { get;  set; } = GenderType.None;
-    public DateTime? DateOfBirth { get;  set; }
+    public DateTimeOffset? DateOfBirth { get;  set; }
     public List<UserAddress> Addresses { get;  set; } = new List<UserAddress>();
-    public FashionPreferences? Preferences { get;  set; } = new FashionPreferences();
+    public FashionPreference? Preferences { get;  set; } = new FashionPreference();
     public List<string>? Wishlist { get;  set; } = new List<string>();
     public bool MarketingConsent { get;  set; }
 }
@@ -29,12 +30,13 @@ internal class RegisterCommandHandler(IAccountService accountService)
         var userProfileResult = UserProfile.Create(
              userId: null,
              email: request.Email,
+             username: request.Username,
              fullName: request.FullName,
              phoneNumber: request.PhoneNumber,
              gender: request.Gender,
              dateOfBirth: request.DateOfBirth,
              addresses: request.Addresses,
-             preferences: request.Preferences ?? new FashionPreferences(),
+             preferences: request.Preferences ?? new FashionPreference(),
              wishlist: request.Wishlist ?? new List<string>(),
              loyaltyPoints: 0,
              marketingConsent: request.MarketingConsent);

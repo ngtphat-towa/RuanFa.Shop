@@ -5,9 +5,9 @@ using RuanFa.Shop.Infrastructure.Data.Constants;
 
 namespace RuanFa.Shop.Infrastructure.Data.Configurations.Identities;
 
-internal class IdentityUserTokenConfiguration : IEntityTypeConfiguration<IdentityUserToken<string>>
+internal class IdentityUserTokenConfiguration : IEntityTypeConfiguration<IdentityUserToken<Guid>>
 {
-    public void Configure(EntityTypeBuilder<IdentityUserToken<string>> builder)
+    public void Configure(EntityTypeBuilder<IdentityUserToken<Guid>> builder)
     {
         builder.ToTable(TableName.UserTokens);
     }

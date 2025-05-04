@@ -7,7 +7,6 @@ using RuanFa.Shop.Application.Todo.Get.ByIds;
 using RuanFa.Shop.Application.Todo.Get.Lists;
 using RuanFa.Shop.Application.Todo.Update.UpdateTodoList;
 using RuanFa.Shop.Application.Todo.Models;
-using RuanFa.Shop.SharedKernel.Models.Wrappers;
 using RuanFa.Shop.Web.Api.Extensions;
 
 namespace RuanFa.Shop.Web.Api.Endpoints.Todos;

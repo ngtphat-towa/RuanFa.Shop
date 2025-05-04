@@ -5,9 +5,9 @@ using RuanFa.Shop.Infrastructure.Data.Constants;
 
 namespace RuanFa.Shop.Infrastructure.Data.Configurations.Identities;
 
-internal class IdentityUserLoginConfiguration : IEntityTypeConfiguration<IdentityUserLogin<string>>
+internal class IdentityUserLoginConfiguration : IEntityTypeConfiguration<IdentityUserLogin<Guid>>
 {
-    public void Configure(EntityTypeBuilder<IdentityUserLogin<string>> builder)
+    public void Configure(EntityTypeBuilder<IdentityUserLogin<Guid>> builder)
     {
         builder.ToTable(TableName.UserLogins);
     }

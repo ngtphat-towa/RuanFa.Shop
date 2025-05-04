@@ -4,7 +4,7 @@ using RuanFa.Shop.Domain.Accounts.ValueObjects;
 
 namespace RuanFa.Shop.Application.Accounts.Validation;
 
-internal class FashionPreferencesValidator : AbstractValidator<FashionPreferences>
+internal class FashionPreferencesValidator : AbstractValidator<FashionPreference>
 {
     public FashionPreferencesValidator()
     {

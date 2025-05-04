@@ -1,17 +1,17 @@
 ﻿using System.Reflection;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-
 using RuanFa.Shop.Application.Common.Data;
 using RuanFa.Shop.Domain.Accounts.Entities;
 using RuanFa.Shop.Domain.Todo;
 using RuanFa.Shop.Domain.Todo.Entities;
 using RuanFa.Shop.Infrastructure.Accounts.Entities;
+using RuanFa.Shop.Infrastructure.Data.Converters;
 
 namespace RuanFa.Shop.Infrastructure.Data;
 
-internal class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-    : IdentityDbContext<ApplicationUser, ApplicationRole, string>(options), IApplicationDbContext
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+    : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>(options), IApplicationDbContext
 {
     public DbSet<UserProfile> Profiles => Set<UserProfile>();
 
@@ -23,5 +23,7 @@ internal class ApplicationDbContext(DbContextOptions<ApplicationDbContext> optio
     {
         base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        builder.ApplyUtcDateTimeConverter();
     }
+  
 }

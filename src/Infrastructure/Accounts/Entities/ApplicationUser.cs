@@ -4,7 +4,7 @@ using RuanFa.Shop.SharedKernel.Interfaces.Domains;
 
 namespace RuanFa.Shop.Infrastructure.Accounts.Entities;
 
-internal class ApplicationUser : IdentityUser, IAuditable
+public class ApplicationUser : IdentityUser<Guid>, IAuditable
 {
     #region Properties
     public string? RefreshToken { get; set; }

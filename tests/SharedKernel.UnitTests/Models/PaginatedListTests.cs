@@ -9,7 +9,7 @@ public class PaginatedListTests
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public int Age { get; set; }
-        public DateTime ? CreatedDate { get; set; }
+        public DateTimeOffset ? CreatedDate { get; set; }
     }
     #region Constructor Tests
     public class ConstructorTests

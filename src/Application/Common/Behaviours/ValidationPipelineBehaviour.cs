@@ -4,8 +4,8 @@ using MediatR;
 
 namespace RuanFa.Shop.Application.Common.Behaviours;
 
-internal sealed class ValidationPipelineBehavior<
-    TRequest, 
+public sealed class ValidationPipelineBehavior<
+    TRequest,
     TResponse>(IValidator<TRequest>? validator = null)
     : IPipelineBehavior<TRequest, TResponse>
         where TRequest : IRequest<TResponse>
@@ -20,14 +20,14 @@ internal sealed class ValidationPipelineBehavior<
     {
         if (_validator is null)
         {
-            return await next(cancellationToken);
+            return await next();
         }
 
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
 
         if (validationResult.IsValid)
         {
-            return await next(cancellationToken);
+            return await next();
         }
 
         var errors = validationResult.Errors

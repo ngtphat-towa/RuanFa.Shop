@@ -35,7 +35,7 @@ public class PolicyEnforcer : IPolicyEnforcer
         }
 
         bool isSelf = request.UserId == user.UserId;
-        bool isAdmin = user.Roles.Contains(Role.Admin) || user.Permissions.Contains("AdminAccess");
+        bool isAdmin = user.Roles.Contains(Role.Administrator) || user.Permissions.Contains("AdminAccess");
 
         return isSelf || isAdmin
             ? Result.Success

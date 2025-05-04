@@ -5,9 +5,9 @@ using RuanFa.Shop.Infrastructure.Data.Constants;
 
 namespace RuanFa.Shop.Infrastructure.Data.Configurations.Identities;
 
-internal class IdentityUserClaimConfiguration : IEntityTypeConfiguration<IdentityUserClaim<string>>
+internal class IdentityUserClaimConfiguration : IEntityTypeConfiguration<IdentityUserClaim<Guid>>
 {
-    public void Configure(EntityTypeBuilder<IdentityUserClaim<string>> builder)
+    public void Configure(EntityTypeBuilder<IdentityUserClaim<Guid>> builder)
     {
         builder.ToTable(TableName.UserClaims);
     }

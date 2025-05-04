@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using RuanFa.Shop.Domain.Todo;
-using RuanFa.Shop.Infrastructure.Data.Configurations.Extensions;
 using RuanFa.Shop.Infrastructure.Data.Constants;
+using RuanFa.Shop.Infrastructure.Data.Converters;
 
 namespace RuanFa.Shop.Infrastructure.Data.Configurations.Todos;
 

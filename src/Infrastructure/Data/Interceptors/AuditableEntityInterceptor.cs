@@ -7,7 +7,7 @@ using RuanFa.Shop.SharedKernel.Interfaces.Domains;
 
 namespace RuanFa.Shop.Infrastructure.Data.Interceptors;
 
-internal sealed class AuditableEntityInterceptor(IUserContext userContext, IDateTimeProvider dateTime)
+internal sealed class AuditableEntityInterceptor(IUserContext userContext, IDateTimeProvider dateTimeProvider)
     : SaveChangesInterceptor
 {
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
@@ -27,30 +27,30 @@ internal sealed class AuditableEntityInterceptor(IUserContext userContext, IDate
 
     private void UpdateEntities(DbContext? context)
     {
-        if (context == null)
-        {
+        if (context == null || !userContext.IsAuthenticated)
             return;
-        }
+
+        var now = dateTimeProvider.UtcNow;
+        var userString = userContext.UserId!=null ? "System" : userContext.Username;
 
         foreach (var entry in context.ChangeTracker.Entries<IAuditable>())
         {
-            if (entry.State is not (EntityState.Added or EntityState.Modified) && !entry.HasChangedOwnedEntities())
-            {
-                continue;
-            }
-
-            DateTime utcNow = dateTime.UtcNow;
-            // Determine the current user or default to "System"
-            string? userId = userContext.UserId;
-            string userString = userId != null ? userId.ToString() : "System";
-
             if (entry.State == EntityState.Added)
             {
+                entry.Entity.CreatedAt = now;
                 entry.Entity.CreatedBy = userString;
-                entry.Entity.CreatedAt = utcNow;
+                entry.Entity.UpdatedAt = now;
+                entry.Entity.UpdatedBy = userString;
             }
-            entry.Entity.UpdatedBy = userString;
-            entry.Entity.UpdatedAt = utcNow;
+            else if (entry.State == EntityState.Modified || entry.HasChangedOwnedEntities())
+            {
+                // Prevent updating Created fields
+                entry.Property(nameof(IAuditable.CreatedAt)).IsModified = false;
+                entry.Property(nameof(IAuditable.CreatedBy)).IsModified = false;
+
+                entry.Entity.UpdatedAt = now;
+                entry.Entity.UpdatedBy = userString;
+            }
         }
     }
 }

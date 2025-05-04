@@ -2,8 +2,8 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using RuanFa.Shop.Domain.Accounts.Entities;
 using RuanFa.Shop.Infrastructure.Accounts.Entities;
-using RuanFa.Shop.Infrastructure.Data.Configurations.Extensions;
 using RuanFa.Shop.Infrastructure.Data.Constants;
+using RuanFa.Shop.Infrastructure.Data.Converters;
 
 namespace RuanFa.Shop.Infrastructure.Data.Configurations.Identities;
 

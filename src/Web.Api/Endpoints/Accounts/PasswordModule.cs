@@ -3,7 +3,6 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using RuanFa.Shop.Application.Accounts.Passwords.Forgot;
 using RuanFa.Shop.Application.Accounts.Passwords.Reset;
-using RuanFa.Shop.Application.Accounts.Passwords.Update;
 using RuanFa.Shop.Web.Api.Extensions;
 
 namespace RuanFa.Shop.Web.Api.Endpoints.Accounts;
