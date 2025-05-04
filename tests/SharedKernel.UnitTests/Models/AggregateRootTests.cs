@@ -73,7 +73,7 @@ public class AggregateRootTests
         public void CreatedAt_CanBeSetAndRetrieved()
         {
             var aggregate = new TestAggregateRoot(1);
-            var date = new DateTime(2023, 1, 1, 0, 0, 0);
+            var date = DateTime.UtcNow;
             aggregate.CreatedAt = date;
             aggregate.CreatedAt.ShouldBe(date);
         }
@@ -82,7 +82,7 @@ public class AggregateRootTests
         public void UpdatedAt_CanBeSetAndRetrieved()
         {
             var aggregate = new TestAggregateRoot(1);
-            var date = new DateTime(2023, 1, 1, 0, 0, 0);
+            var date = DateTime.UtcNow;
             aggregate.UpdatedAt = date;
             aggregate.UpdatedAt.ShouldBe(date);
         }

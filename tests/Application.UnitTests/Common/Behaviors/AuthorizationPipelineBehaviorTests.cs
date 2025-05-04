@@ -4,8 +4,6 @@ using NSubstitute;
 using RuanFa.Shop.Application.Common.Behaviours;
 using RuanFa.Shop.Application.Common.Security.Authorization.Services;
 using RuanFa.Shop.Application.Common.Security.Policies;
-using Shouldly;
-using Xunit;
 
 namespace RuanFa.Shop.Application.UnitTests.Common.Behaviors;
 
@@ -110,7 +108,7 @@ public class AuthorizationPipelineBehaviorTests
     public async Task Handle_IUserMessage_NoAttributes_AppliesDefaultPolicy()
     {
         // Arrange
-        var request = new UserMessageNoAttributesRequest("user123");
+        var request = new UserMessageNoAttributesRequest(Guid.NewGuid());
         ErrorOr<Response> expectedResponse = Response.Instance;
 
         var next = Substitute.For<RequestHandlerDelegate<ErrorOr<Response>>>();
@@ -146,7 +144,7 @@ public class AuthorizationPipelineBehaviorTests
     public async Task Handle_IUserMessage_WithAttributes_UsesSpecifiedAttributes()
     {
         // Arrange
-        var request = new UserMessageWithAttributesRequest("user123");
+        var request = new UserMessageWithAttributesRequest(Guid.NewGuid());
         ErrorOr<Response> expectedResponse = Response.Instance;
 
         var next = Substitute.For<RequestHandlerDelegate<ErrorOr<Response>>>();

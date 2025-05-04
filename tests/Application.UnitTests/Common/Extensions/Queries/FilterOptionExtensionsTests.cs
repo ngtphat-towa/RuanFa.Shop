@@ -72,7 +72,7 @@ public class FilterOptionExtensionsTests
         public bool IsActive { get; set; }
         public decimal Score { get; set; }
         public string[]? Tags { get; set; }
-        public DateTime  CreatedDate { get; set; }
+        public DateTime CreatedDate { get; set; }
     }
 
     #region Valid Filter Tests

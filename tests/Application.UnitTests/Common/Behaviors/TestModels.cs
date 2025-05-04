@@ -1,6 +1,4 @@
-﻿using ErrorOr;
-using MediatR;
-using RuanFa.Shop.Application.Common.Security.Authorization.Attributes;
+﻿using RuanFa.Shop.Application.Common.Security.Authorization.Attributes;
 using RuanFa.Shop.SharedKernel.Interfaces.Messaging;
 
 namespace RuanFa.Shop.Application.UnitTests.Common.Behaviors;
@@ -18,9 +16,9 @@ public record WithAttributesRequest : ICommand<Response>;
 
 public record UserMessageNoAttributesRequest : IUserCommand<Response>
 {
-    public string UserId { get; set; }
+    public Guid UserId { get; set; }
 
-    public UserMessageNoAttributesRequest(string userId)
+    public UserMessageNoAttributesRequest(Guid userId)
     {
         UserId = userId;
     }
@@ -29,9 +27,9 @@ public record UserMessageNoAttributesRequest : IUserCommand<Response>
 [ApiAuthorize(permissions: "Read", roles: "User")]
 public record UserMessageWithAttributesRequest : IUserCommand<Response>
 {
-    public string UserId { get; set; }
+    public Guid UserId { get; set; }
 
-    public UserMessageWithAttributesRequest(string userId)
+    public UserMessageWithAttributesRequest(Guid userId)
     {
         UserId = userId;
     }
