@@ -8,11 +8,11 @@ public static partial class DomainErrors
     {
         // General Validation Errors
         public static Error RequiredField(string field) => Error.Validation(
-            code: $"Account.{field}.Required",
+            code: $"Account.{field}Required",
             description: $"{field} is required.");
 
         public static Error InvalidFieldFormat(string field) => Error.Validation(
-            code: $"Account.{field}.InvalidFormat",
+            code: $"Account.{field}InvalidFormat",
             description: $"The {field} format is invalid.");
 
         public static Error FieldTooShort(string field, int minLength) => Error.Validation(
@@ -23,13 +23,19 @@ public static partial class DomainErrors
             code: "Account.InvalidPasswordFormat",
             description: "Password must contain at least one number, one letter, and one special character.");
 
+        // Identitifier
+        public static Error InvalidUserIdentifier => Error.Validation(
+            code: "Account.InvalidUserIdentifier",
+            description: "Must be either a valid email address or username");
+
         // Email Errors
         public static Error EmailRequired => RequiredField("Email");
         public static Error InvalidEmailFormat => InvalidFieldFormat("Email");
 
         // Username Errors
-        public static Error UsernameRequired => RequiredField("Username");
-        public static Error InvalidUsernameFormat => InvalidFieldFormat("Username");
+        public static Error InvalidUsernameFormat => Error.Validation(
+            code: "Account.InvalidUsernameFormat",
+            description: "Username must be 3-20 characters long and contain only letters, numbers, and underscores");
 
         // Password Errors
         public static Error PasswordRequired => RequiredField("Password");

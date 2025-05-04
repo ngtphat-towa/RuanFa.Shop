@@ -13,6 +13,7 @@ public class UserProfile : Entity<Guid>
 {
     #region Properties
     public Guid? UserId { get; private set; }
+    public string? Username { get; private set; }
     public string Email { get; private set; } = string.Empty;
     public string FullName { get; private set; } = string.Empty;
     public string? PhoneNumber { get; private set; }
@@ -33,6 +34,7 @@ public class UserProfile : Entity<Guid>
 
     private UserProfile(
         Guid userId,
+        string? username,
         string email,
         string fullName,
         string? phoneNumber,
@@ -47,6 +49,7 @@ public class UserProfile : Entity<Guid>
     {
         UserId = userId;
         Email = email;
+        Username = username;
         FullName = fullName;
         PhoneNumber = phoneNumber;
         Gender = gender;
@@ -62,18 +65,19 @@ public class UserProfile : Entity<Guid>
 
     #region Methods
     public static ErrorOr<UserProfile> Create(
-        Guid? userId,
-        string? email,
-        string fullName,
-        string? phoneNumber,
-        GenderType gender,
-        DateTimeOffset? dateOfBirth,
-        List<UserAddress> addresses,
-        FashionPreference preferences,
-        List<string> wishlist,
-        int loyaltyPoints,
-        bool marketingConsent,
-        ICollection<Order>? orders = null)
+    Guid? userId,
+    string? username,
+    string? email,
+    string? fullName,
+    string? phoneNumber,
+    GenderType gender,
+    DateTimeOffset? dateOfBirth,
+    List<UserAddress>? addresses,
+    FashionPreference? preferences,
+    List<string>? wishlist,
+    int loyaltyPoints,
+    bool marketingConsent,
+    ICollection<Order>? orders = null)
     {
         var errors = new List<Error>();
 
@@ -82,7 +86,11 @@ public class UserProfile : Entity<Guid>
             errors.Add(DomainErrors.UserProfile.InvalidUserId);
         }
 
-        if (string.IsNullOrWhiteSpace(email) || !IsValidEmail(email))
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            errors.Add(DomainErrors.UserProfile.EmailRequired);
+        }
+        else if (!IsValidEmail(email))
         {
             errors.Add(DomainErrors.UserProfile.InvalidEmailFormat);
         }
@@ -92,31 +100,34 @@ public class UserProfile : Entity<Guid>
             errors.Add(DomainErrors.UserProfile.FullNameRequired);
         }
 
-        if (errors.Count != 0)
+        if (errors.Any())
         {
             return errors;
         }
 
         var profile = new UserProfile(
-            userId!.Value,
-            email!,
-            fullName,
-            phoneNumber,
-            gender,
-            dateOfBirth,
-            addresses,
-            preferences,
-            wishlist,
-            loyaltyPoints,
-            marketingConsent,
-            orders);
+            userId: userId!.Value,
+            username: username,
+            email: email!,
+            fullName: fullName!,
+            phoneNumber: phoneNumber,
+            gender: gender,
+            dateOfBirth: dateOfBirth,
+            addresses: addresses ?? new List<UserAddress>(),
+            preferences: preferences ?? new FashionPreference(),
+            wishlist: wishlist ?? new List<string>(),
+            loyaltyPoints: loyaltyPoints,
+            marketingConsent: marketingConsent,
+            orders: orders);
 
         profile.AddDomainEvent(new UserProfileCreatedEvent(profile));
         return profile;
     }
 
+
     public ErrorOr<Updated> UpdatePersonalDetails(
         string email,
+        string? username,
         string fullName,
         string? phoneNumber,
         GenderType gender,
@@ -145,6 +156,7 @@ public class UserProfile : Entity<Guid>
         }
 
         Email = email;
+        Username = username;
         FullName = fullName;
         PhoneNumber = phoneNumber;
         Gender = gender;

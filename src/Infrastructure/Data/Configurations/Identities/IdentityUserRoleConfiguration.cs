@@ -5,9 +5,9 @@ using RuanFa.Shop.Infrastructure.Data.Constants;
 
 namespace RuanFa.Shop.Infrastructure.Data.Configurations.Identities;
 
-internal class IdentityUserRoleConfiguration : IEntityTypeConfiguration<IdentityUserRole<string>>
+internal class IdentityUserRoleConfiguration : IEntityTypeConfiguration<IdentityUserRole<Guid>>
 {
-    public void Configure(EntityTypeBuilder<IdentityUserRole<string>> builder)
+    public void Configure(EntityTypeBuilder<IdentityUserRole<Guid>> builder)
     {
         builder.ToTable(TableName.UserRoles);
     }

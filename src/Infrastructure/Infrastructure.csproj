@@ -3,6 +3,7 @@
   <PropertyGroup>
     <RootNamespace>RuanFa.Shop.Infrastructure</RootNamespace>
     <AssemblyName>RuanFa.Shop.Infrastructure</AssemblyName>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
   </PropertyGroup>
 
 
@@ -28,6 +29,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Application\Application.csproj" />
+    <InternalsVisibleTo Include="RuanFa.Shop.Application.UnitTests" />
+    <InternalsVisibleTo Include="RuanFa.Shop.Infrastructure.UnitTests" />
+    <InternalsVisibleTo Include="RuanFa.Shop.Application.SubcutaneousTests" />
   </ItemGroup>
 
 </Project>

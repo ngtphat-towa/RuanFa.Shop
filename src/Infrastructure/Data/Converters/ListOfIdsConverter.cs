@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace RuanFa.Shop.Infrastructure.Data.Configurations.Extensions;
+namespace RuanFa.Shop.Infrastructure.Data.Converters;
 
 public class ListOfIdsConverter(ConverterMappingHints? mappingHints = null)
     : ValueConverter<List<Guid>, string>(

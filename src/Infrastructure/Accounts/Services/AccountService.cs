@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Json;
 using System.Text;
 using System.Text.Encodings.Web;
+using System.Text.RegularExpressions;
 using ErrorOr;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Http;
@@ -102,13 +103,14 @@ internal class AccountService(
         try
         {
             // Retrieve user by ID
-            var user = await userManager.FindByIdAsync(appUserId);
-            if (user is null)
+            var applicationUser = await userManager.FindByIdAsync(appUserId);
+            if (applicationUser is null)
                 return InfrastructureErrors.Account.NotFound;
+
 
             // Retrieve associated user profile
             var userProfile = await dbContext.Profiles
-                .FirstOrDefaultAsync(u => u.UserId == appUserId, cancellationToken);
+                .FirstOrDefaultAsync(u => u.UserId == applicationUser.Id, cancellationToken);
 
             if (userProfile is null)
                 return DomainErrors.UserProfile.NotFound;
@@ -129,26 +131,27 @@ internal class AccountService(
             if (string.IsNullOrEmpty(changedEmail))
             {
                 // Confirm the user's email
-                result = await userManager.ConfirmEmailAsync(user, decodedToken);
+                result = await userManager.ConfirmEmailAsync(applicationUser, decodedToken);
             }
             else
             {
                 // Change the user's email
-                result = await userManager.ChangeEmailAsync(user, changedEmail, decodedToken);
+                result = await userManager.ChangeEmailAsync(applicationUser, changedEmail, decodedToken);
                 if (result.Succeeded)
                 {
                     // Update username to match new email
-                    var setUsernameResult = await userManager.SetUserNameAsync(user, changedEmail);
+                    var setUsernameResult = await userManager.SetUserNameAsync(applicationUser, changedEmail);
                     if (!setUsernameResult.Succeeded)
                     {
                         // Rollback email change on failure
-                        await userManager.SetEmailAsync(user, user.Email);
+                        await userManager.SetEmailAsync(applicationUser, applicationUser.Email);
                         return setUsernameResult.Errors.ToApplicationResult("ChangeEmailFailed");
                     }
 
                     // Update user profile with new email
                     var updateProfileResult = userProfile.UpdatePersonalDetails(
                         email: changedEmail,
+                        username: userProfile.Username,
                         fullName: userProfile.FullName,
                         phoneNumber: userProfile.PhoneNumber,
                         gender: userProfile.Gender,
@@ -193,6 +196,8 @@ internal class AccountService(
             // Verify default role exists
             if (!await roleManager.RoleExistsAsync(UserRole))
                 return InfrastructureErrors.Account.RoleNotFound;
+
+            var username = await GenerateUniqueUsernameAsync(profile);
 
             // Create identity user
             var appUser = new ApplicationUser
@@ -256,13 +261,13 @@ internal class AccountService(
         var userId = userContext.UserId;
         try
         {
-            if (string.IsNullOrEmpty(userId) || !userContext.IsAuthenticated)
+            if (!userContext.IsAuthenticated || userId is null)
             {
                 return InfrastructureErrors.Account.NotAuthenticated;
             }
 
             // Retrieve user
-            var user = await userManager.FindByIdAsync(userId);
+            var user = await userManager.FindByIdAsync(userId.Value.ToString());
             if (user is null)
                 return InfrastructureErrors.Account.NotFound;
 
@@ -273,7 +278,7 @@ internal class AccountService(
                 return DomainErrors.UserProfile.NotFound;
 
             // Get account details before deletion
-            var accountResult = await GetAccountInfoInternalAsync(userId, cancellationToken);
+            var accountResult = await GetAccountInfoInternalAsync(userId.Value, cancellationToken);
             if (accountResult.IsError)
                 return accountResult.Errors;
 
@@ -329,15 +334,14 @@ internal class AccountService(
     public async Task<ErrorOr<AccountInfoResult>> GetAccountInfoAsync(CancellationToken cancellationToken = default)
     {
         var userId = userContext.UserId;
-
         try
         {
-            if (string.IsNullOrEmpty(userId) || !userContext.IsAuthenticated)
+            if (!userId.HasValue || !userContext.IsAuthenticated)
             {
                 return InfrastructureErrors.Account.NotAuthenticated;
             }
 
-            return await GetAccountInfoInternalAsync(userId, cancellationToken);
+            return await GetAccountInfoInternalAsync(userId.Value, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -458,16 +462,18 @@ internal class AccountService(
                 return generatedTokenResult;
             }
 
+            var uniqueUsername = await GenerateUniqueUsernameAsync(payload);
             // Create new user profile
             var newUserProfile = UserProfile.Create(
                 userId: null,
+                username: uniqueUsername,
                 email: payload.Email,
                 fullName: $"{payload.FirstName} {payload.LastName}".Trim(),
                 phoneNumber: null,
                 gender: GenderType.None,
                 dateOfBirth: null,
                 addresses: new List<UserAddress>(),
-                preferences: new FashionPreferences(),
+                preferences: new FashionPreference(),
                 wishlist: new List<string>(),
                 loyaltyPoints: 0,
                 marketingConsent: false).Value;
@@ -512,13 +518,13 @@ internal class AccountService(
         var userId = userContext.UserId;
         try
         {
-            if (string.IsNullOrEmpty(userId) || !userContext.IsAuthenticated)
+            if (!userContext.IsAuthenticated || userId is null)
             {
                 return InfrastructureErrors.Account.NotAuthenticated;
             }
 
             // Retrieve user
-            var user = await userManager.FindByIdAsync(userId);
+            var user = await userManager.FindByIdAsync(userId.Value.ToString());
             if (user is null)
                 return InfrastructureErrors.Account.NotFound;
 
@@ -568,11 +574,6 @@ internal class AccountService(
             if (errors.Count != 0)
                 return errors;
 
-            // Update audit fields
-            user.UpdatedAt = dateTimeProvider.UtcNow;
-            user.UpdatedBy = userId;
-            await userManager.UpdateAsync(user);
-
             Log.Information("Credentials updated for user {UserId}. Email updated: {EmailUpdated}.", userId, emailUpdated);
             return emailUpdated
                 ? InfrastructureErrors.Account.EmailConfirmationSent
@@ -585,12 +586,70 @@ internal class AccountService(
         }
     }
 
-    private async Task<ErrorOr<AccountInfoResult>> GetAccountInfoInternalAsync(string userId, CancellationToken cancellationToken = default)
+    private async Task<string> GenerateUniqueUsernameAsync(SocialPayload payload)
+    {
+        // 1. Generate base username from social data
+        var baseUsername = !string.IsNullOrWhiteSpace(payload.FirstName)
+            ? $"{payload.FirstName}{payload.LastName}".Trim().ToLower()
+            : payload.Email.Split('@')[0];
+
+        // 2. Sanitize username
+        var cleanUsername = Regex.Replace(baseUsername, "[^a-z0-9]", "");
+
+        // 3. Ensure minimum viable length
+        cleanUsername = cleanUsername.Length >= 3
+            ? cleanUsername
+            : "user";
+
+        // 4. Find available variant
+        for (var i = 1; i <= 10; i++)
+        {
+            var candidate = i == 1 ? cleanUsername : $"{cleanUsername}{i - 1}";
+            if (await userManager.FindByNameAsync(candidate) == null)
+            {
+                return candidate;
+            }
+        }
+
+        // 5. Final fallback with timestamp
+        return $"{cleanUsername}{DateTime.Now:yyyyMMddHHmmss}";
+    }
+
+    private async Task<string> GenerateUniqueUsernameAsync(UserProfile profile)
+    {
+        // 1. Generate base username from profile data
+        var baseUsername = !string.IsNullOrWhiteSpace(profile.FullName)
+            ? profile.FullName.Replace(" ", "").ToLower()
+            : profile.Email.Split('@')[0];
+
+        // 2. Sanitize username
+        var cleanUsername = Regex.Replace(baseUsername, "[^a-z0-9]", "");
+
+        // 3. Ensure minimum viable length
+        cleanUsername = cleanUsername.Length >= 3
+            ? cleanUsername
+            : "user";
+
+        // 4. Find available variant
+        for (var i = 1; i <= 10; i++)
+        {
+            var candidate = i == 1 ? cleanUsername : $"{cleanUsername}{i - 1}";
+            if (await userManager.FindByNameAsync(candidate) == null)
+            {
+                return candidate;
+            }
+        }
+
+        // 5. Final fallback with timestamp
+        return $"{cleanUsername}{DateTime.Now:yyyyMMddHHmmss}";
+    }
+
+    private async Task<ErrorOr<AccountInfoResult>> GetAccountInfoInternalAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         try
         {
             // Retrieve user
-            var appUser = await userManager.FindByIdAsync(userId);
+            var appUser = await userManager.FindByIdAsync(userId.ToString());
             if (appUser is null)
                 return InfrastructureErrors.Account.NotFound;
 

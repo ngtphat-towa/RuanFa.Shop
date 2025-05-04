@@ -11,6 +11,7 @@ namespace RuanFa.Shop.Application.Accounts.Authentication.Register;
 public class RegisterCommand : ICommand<AccountInfoResult>
 {
     public string Email { get;  set; } = string.Empty;
+    public string? Username { get;  set; } = string.Empty;
     public string Password { get;  set; } = string.Empty;
     public string FullName { get;  set; } = string.Empty;
     public string? PhoneNumber { get;  set; }
@@ -29,6 +30,7 @@ internal class RegisterCommandHandler(IAccountService accountService)
         var userProfileResult = UserProfile.Create(
              userId: null,
              email: request.Email,
+             username: request.Username,
              fullName: request.FullName,
              phoneNumber: request.PhoneNumber,
              gender: request.Gender,

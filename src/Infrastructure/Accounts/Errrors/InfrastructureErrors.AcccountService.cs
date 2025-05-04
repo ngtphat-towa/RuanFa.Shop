@@ -61,6 +61,10 @@ public static partial class InfrastructureErrors
             code: "Account.AlreadyExists",
             description: "A user with this email address already exists.");
 
+        public static Error UsernameTaken => Error.Conflict(
+             code: "Account.UsernameTaken",
+             description: "The requested username is already in use");
+
         /// <summary>
         /// Gets an error indicating an internal failure during account creation.
         /// </summary>
@@ -96,6 +100,10 @@ public static partial class InfrastructureErrors
         public static Error ConfirmEmailInternal => Error.Failure(
             code: "Account.ConfirmEmailInternal",
             description: "An unexpected error occurred while confirming the email.");
+
+        public static Error UsernameGenerationFailed => Error.Conflict(
+            code: "Account.UsernameGenerationFailed",
+            description: "Failed to generate a unique username after multiple attempts");
 
         /// <summary>
         /// Gets an error indicating that the default user role was not found.

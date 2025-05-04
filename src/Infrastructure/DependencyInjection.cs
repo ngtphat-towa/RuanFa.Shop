@@ -19,6 +19,7 @@ using RuanFa.Shop.Infrastructure.Accounts.Entities;
 using RuanFa.Shop.Infrastructure.Accounts.Services;
 using RuanFa.Shop.Infrastructure.Data;
 using RuanFa.Shop.Infrastructure.Data.Interceptors;
+using RuanFa.Shop.Infrastructure.Data.Seeds;
 using RuanFa.Shop.Infrastructure.Notifications;
 using RuanFa.Shop.Infrastructure.Notifications.Emails;
 using RuanFa.Shop.Infrastructure.Notifications.Sms;
@@ -43,7 +44,8 @@ public static class DependencyInjection
             .AddDatabase(configuration)
             .AddIdentityServices()
             .AddAuthenticationInternal(configuration)
-            .AddHttpClientWithClientId();
+            .AddHttpClientWithClientId()
+            .AddSeeders();
 
         return services;
     }
@@ -214,6 +216,16 @@ public static class DependencyInjection
             client.BaseAddress = new Uri("https://graph.facebook.com/");
             client.DefaultRequestHeaders.Add("Accept", "application/json");
         });
+
+        return services;
+    }
+    private static IServiceCollection AddSeeders(this IServiceCollection services)
+    {
+        // Register seeders
+        services.AddTransient<IDataSeeder, IdentitySeedProvider>();
+
+        // Register orchestrator as hosted service
+        services.AddHostedService<SeedOrchestrator>();
 
         return services;
     }

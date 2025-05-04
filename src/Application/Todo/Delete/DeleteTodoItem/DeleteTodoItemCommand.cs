@@ -1,11 +1,14 @@
 ﻿using ErrorOr;
 using Microsoft.EntityFrameworkCore;
 using RuanFa.Shop.Application.Common.Data;
+using RuanFa.Shop.Application.Common.Security.Authorization.Attributes;
+using RuanFa.Shop.Application.Common.Security.Permissions;
 using RuanFa.Shop.Domain.Todo.Errors;
 using RuanFa.Shop.SharedKernel.Interfaces.Messaging;
 
 namespace RuanFa.Shop.Application.Todo.Delete.DeleteTodoItem;
 
+[ApiAuthorize(Permission.TodoItem.Delete)]
 public record DeleteTodoItemCommand : ICommand<Deleted>
 {
     public int Id { get; init; }
