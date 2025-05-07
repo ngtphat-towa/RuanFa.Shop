@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RuanFa.Shop.Infrastructure.Data.Converters;
-using Shouldly;
-using System;
 
 namespace RuanFa.Shop.Infrastructure.UnitTests.Data.Converters
 {

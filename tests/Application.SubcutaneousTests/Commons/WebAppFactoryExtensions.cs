@@ -10,7 +10,7 @@ using RuanFa.Shop.Tests.Shared.Constants;
 
 namespace RuanFa.Shop.Application.SubcutaneousTests.Commons;
 
-public static class WebAppFactoryExtensions
+internal static class WebAppFactoryExtensions
 {
     /// <summary>
     /// Creates a test user and sets it up in the test user context and provider

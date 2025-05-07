@@ -17,7 +17,7 @@ using RuanFa.Shop.Web.Api;
 
 namespace RuanFa.Shop.Application.SubcutaneousTests.Commons;
 
-public class WebAppFactory : WebApplicationFactory<IAssemblyMarker>, IAsyncLifetime
+internal class WebAppFactory : WebApplicationFactory<IAssemblyMarker>, IAsyncLifetime
 {
     public TestUserContext TestUserContext { get; private set; } = new();
     public TestCurrentUserProvider TestCurrentUserProvider { get; private set; } = new();
