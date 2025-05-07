@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RuanFa.Shop.Domain.Accounts.Entities;
+using RuanFa.Shop.Domain.Attributes;
+using RuanFa.Shop.Domain.Attributes.Entities;
 using RuanFa.Shop.Domain.Todo;
 using RuanFa.Shop.Domain.Todo.Entities;
 
@@ -13,5 +15,12 @@ public interface IApplicationDbContext
     // Todo testing
     DbSet<TodoList> TodoLists { get; }
     DbSet<TodoItem> TodoItems { get; }
+
+    // Attributes 
+    DbSet<CatalogAttribute> Attributes { get; }
+    DbSet<AttributeOption> AttributeOptions { get; }
+    DbSet<AttributeGroup> AttributeGroups { get; }
+    DbSet<AttributeGroupAttribute> AttributeGroupAttributes { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

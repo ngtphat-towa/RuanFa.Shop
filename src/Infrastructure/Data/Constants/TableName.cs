@@ -9,8 +9,19 @@ public static class TableName
     public const string UserTokens = "user_tokens";
     public const string UserClaims = "user_claims";
     public const string UserLogins = "user_logins";
-    public const string UserProfile = "user_profile";
+    public const string UserProfile = "user_profiles";
 
     public const string TodoLists = "todo_lists";
     public const string TodoItems = "todo_items";
+
+    public const string Attributes = "attributes";
+    public const string AttributeOptions = "attribute_options";
+    public const string AttributeGroups = "attribute_groups";
+    public const string AttributeGroupAttributes = "attribute_group_attributes";
+
+    public const string Categories = "categories";
+    public const string ProductCategories = "product_categories";
+
+    public const string Products = "products";
+
 }
