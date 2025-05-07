@@ -4,10 +4,11 @@ using RuanFa.Shop.Domain.Catalogs.Enums;
 using RuanFa.Shop.SharedKernel.Models.Domains;
 using System.Text.RegularExpressions;
 using RuanFa.Shop.SharedKernel.Interfaces.Domains;
+using RuanFa.Shop.Domain.Catalogs.Entities;
 
-namespace RuanFa.Shop.Domain.Catalogs.Entities;
+namespace RuanFa.Shop.Domain.Catalogs.AggregateRoots;
 
-public class ProductVariant : Entity<Guid>
+public class ProductVariant : AggregateRoot<Guid>
 {
     #region Properties
     public string Sku { get; private set; } = null!;
@@ -17,15 +18,14 @@ public class ProductVariant : Entity<Guid>
     public StockStatus StockStatus { get; private set; } = StockStatus.InStock;
     public bool IsActive { get; private set; } = true;
     public bool IsDefault { get; private set; }
+    public Guid ProductId { get; private set; }
     #endregion
 
     #region Relationships
-    public Guid ProductId { get; private set; }
     public Product Product { get; private set; } = null!;
     private readonly List<VariantAttributeOption> _variantAttributeOptions = new();
     private readonly List<StockMovement> _stockMovements = new();
     private readonly List<ProductImage> _variantImages = new();
-
     public IReadOnlyCollection<VariantAttributeOption> VariantAttributeOptions => _variantAttributeOptions.AsReadOnly();
     public IReadOnlyCollection<StockMovement> StockMovements => _stockMovements.AsReadOnly();
     public IReadOnlyCollection<ProductImage> VariantImages => _variantImages.AsReadOnly();
@@ -40,7 +40,7 @@ public class ProductVariant : Entity<Guid>
         int stockQuantity,
         int lowStockThreshold,
         Guid productId,
-        bool isDefault = false)
+        bool isDefault)
     {
         Id = Guid.NewGuid();
         Sku = sku;
@@ -85,8 +85,7 @@ public class ProductVariant : Entity<Guid>
                 variantId: variant.Id,
                 quantity: stockQuantity,
                 movementType: MovementType.Initial,
-                notes: "Initial stock setup"
-            );
+                notes: "Initial stock setup");
 
             if (initialMovementResult.IsError)
                 return initialMovementResult.Errors;
@@ -100,7 +99,7 @@ public class ProductVariant : Entity<Guid>
     #endregion
 
     #region Methods
-    public ErrorOr<Updated> UpdateDetails(
+    public ErrorOr<Updated> Update(
         string? sku = null,
         decimal? priceOffset = null,
         int? lowStockThreshold = null)
@@ -127,6 +126,7 @@ public class ProductVariant : Entity<Guid>
             UpdateStockStatus();
         }
 
+        AddDomainEvent(new ProductVariantUpdatedEvent(Id, Sku, PriceOffset, LowStockThreshold));
         return Result.Updated;
     }
 
@@ -151,16 +151,19 @@ public class ProductVariant : Entity<Guid>
             quantity: Math.Abs(quantity),
             movementType: movementType,
             referenceId: referenceId,
-            notes: notes
-        );
+            notes: notes);
 
         if (stockMovementResult.IsError)
             return stockMovementResult.Errors;
 
+        var oldStockStatus = StockStatus;
         _stockMovements.Add(stockMovementResult.Value);
         StockQuantity += stockMovementResult.Value.GetSignedQuantity();
         UpdateStockStatus();
+
         AddDomainEvent(new StockAdjustedEvent(Id, quantity, movementType));
+        if (oldStockStatus != StockStatus)
+            AddDomainEvent(new StockStatusChangedEvent(Id, oldStockStatus, StockStatus));
 
         return Result.Updated;
     }
@@ -178,21 +181,21 @@ public class ProductVariant : Entity<Guid>
         if (attributeOptionIds == null || !attributeOptionIds.Any())
             return DomainErrors.VariantAttributeOption.NoAttributeOptionsProvided;
 
-        // Validate attribute options belong to the product's AttributeGroup
         var invalidOptions = attributeOptionIds.Where(id => id == Guid.Empty).ToList();
         if (invalidOptions.Any())
             return DomainErrors.VariantAttributeOption.InvalidAttributeOptionId;
 
-        // Clear existing options and add new ones
+        var duplicates = attributeOptionIds.GroupBy(id => id).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
+        if (duplicates.Any())
+            return DomainErrors.VariantAttributeOption.DuplicateAttributeOption;
+
+        var oldOptions = _variantAttributeOptions.Select(opt => opt.AttributeOptionId).ToList();
         _variantAttributeOptions.Clear();
         var errors = new List<Error>();
 
         foreach (var optionId in attributeOptionIds)
         {
-            if (_variantAttributeOptions.Any(opt => opt.AttributeOptionId == optionId))
-                continue; // Skip duplicates
-
-            var optionResult = VariantAttributeOption.Create(variantId: Id, optionId);
+            var optionResult = VariantAttributeOption.Create(variantId: Id, attributeOptionId: optionId);
             if (optionResult.IsError)
             {
                 errors.AddRange(optionResult.Errors);
@@ -237,6 +240,19 @@ public class ProductVariant : Entity<Guid>
         return Result.Updated;
     }
 
+    public ErrorOr<Updated> RemoveAllAttributeOptions()
+    {
+        var removedOptionIds = _variantAttributeOptions.Select(opt => opt.AttributeOptionId).ToList();
+        _variantAttributeOptions.Clear();
+
+        foreach (var optionId in removedOptionIds)
+        {
+            AddDomainEvent(new VariantAttributeRemovedEvent(Id, optionId));
+        }
+
+        return Result.Updated;
+    }
+
     public ErrorOr<Updated> SetAsDefault()
     {
         IsDefault = true;
@@ -253,12 +269,14 @@ public class ProductVariant : Entity<Guid>
     public ErrorOr<Updated> Activate()
     {
         IsActive = true;
+        AddDomainEvent(new VariantActivatedEvent(Id));
         return Result.Updated;
     }
 
     public ErrorOr<Updated> Deactivate()
     {
         IsActive = false;
+        AddDomainEvent(new VariantDeactivatedEvent(Id));
         return Result.Updated;
     }
 
@@ -274,15 +292,14 @@ public class ProductVariant : Entity<Guid>
 
     #region Domain Events
     public record ProductVariantCreatedEvent(Guid VariantId, Guid ProductId, string Sku) : IDomainEvent;
-
+    public record ProductVariantUpdatedEvent(Guid VariantId, string Sku, decimal PriceOffset, int LowStockThreshold) : IDomainEvent;
     public record StockAdjustedEvent(Guid VariantId, int Quantity, MovementType MovementType) : IDomainEvent;
-
+    public record StockStatusChangedEvent(Guid VariantId, StockStatus OldStatus, StockStatus NewStatus) : IDomainEvent;
     public record VariantAttributesUpdatedEvent(Guid VariantId, ICollection<Guid> AttributeOptionIds) : IDomainEvent;
-
     public record VariantAttributeAddedEvent(Guid VariantId, Guid AttributeOptionId) : IDomainEvent;
-
     public record VariantAttributeRemovedEvent(Guid VariantId, Guid AttributeOptionId) : IDomainEvent;
-
     public record VariantSetAsDefaultEvent(Guid VariantId) : IDomainEvent;
+    public record VariantActivatedEvent(Guid VariantId) : IDomainEvent;
+    public record VariantDeactivatedEvent(Guid VariantId) : IDomainEvent;
     #endregion
 }

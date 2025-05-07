@@ -1,11 +1,10 @@
 ﻿using ErrorOr;
-using RuanFa.Shop.Domain.Attributes.Entities;
-using RuanFa.Shop.Domain.Attributes.Errors;
-using RuanFa.Shop.Domain.Catalogs;
+using RuanFa.Shop.Domain.Catalogs.Entities;
+using RuanFa.Shop.Domain.Catalogs.Errors;
 using RuanFa.Shop.SharedKernel.Interfaces.Domains;
 using RuanFa.Shop.SharedKernel.Models.Domains;
 
-namespace RuanFa.Shop.Domain.Attributes;
+namespace RuanFa.Shop.Domain.Catalogs.AggregateRoots;
 
 public class AttributeGroup : AggregateRoot<Guid>
 {
@@ -35,29 +34,28 @@ public class AttributeGroup : AggregateRoot<Guid>
     #endregion
 
     #region Factory
-    public static ErrorOr<AttributeGroup> Create(string groupName)
+    public static ErrorOr<AttributeGroup> Create(string newName)
     {
-        if (string.IsNullOrWhiteSpace(groupName))
+        if (string.IsNullOrWhiteSpace(newName))
         {
             return DomainErrors.AttributeGroup.EmptyName;
         }
-
-        if (groupName.Length < 3)
+        if (newName.Length < 3)
         {
             return DomainErrors.AttributeGroup.NameTooShort;
         }
-
-        if (groupName.Length > 50)
+        if (newName.Length > 100)
         {
             return DomainErrors.AttributeGroup.NameTooLong;
         }
 
-        return new AttributeGroup(groupName);
+
+        return new AttributeGroup(newName);
     }
     #endregion
 
     #region Methods
-    public ErrorOr<Updated> UpdateGroupName(string newName)
+    public ErrorOr<Updated> Update(string newName)
     {
         if (string.IsNullOrWhiteSpace(newName))
         {
@@ -68,8 +66,7 @@ public class AttributeGroup : AggregateRoot<Guid>
         {
             return DomainErrors.AttributeGroup.NameTooShort;
         }
-
-        if (newName.Length > 50)
+        if (newName.Length > 100)
         {
             return DomainErrors.AttributeGroup.NameTooLong;
         }

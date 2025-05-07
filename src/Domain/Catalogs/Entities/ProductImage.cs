@@ -3,6 +3,7 @@ using RuanFa.Shop.Domain.Catalogs.Errors;
 using RuanFa.Shop.SharedKernel.Models.Domains;
 using RuanFa.Shop.Domain.Catalogs.ValueObjects;
 using RuanFa.Shop.SharedKernel.Interfaces.Domains;
+using RuanFa.Shop.Domain.Catalogs.AggregateRoots;
 
 namespace RuanFa.Shop.Domain.Catalogs.Entities;
 

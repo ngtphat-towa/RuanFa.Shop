@@ -1,4 +1,5 @@
 ﻿using ErrorOr;
+using RuanFa.Shop.Domain.Catalogs.AggregateRoots;
 using RuanFa.Shop.Domain.Catalogs.Enums;
 using RuanFa.Shop.Domain.Catalogs.Errors;
 using RuanFa.Shop.SharedKernel.Models.Domains;
@@ -8,12 +9,15 @@ namespace RuanFa.Shop.Domain.Catalogs.Entities;
 public class StockMovement : Entity<Guid>
 {
     #region Properties
-    public Guid VariantId { get; private set; }
-    public ProductVariant Variant { get; private set; } = default!;
     public int Quantity { get; private set; }
     public MovementType MovementType { get; private set; }
     public Guid? ReferenceId { get; private set; }
     public string? Notes { get; private set; }
+    #endregion
+
+    #region Relationship
+    public Guid VariantId { get; private set; }
+    public ProductVariant Variant { get; private set; } = default!;
     #endregion
 
     #region Constructor

@@ -1,6 +1,6 @@
 ﻿using ErrorOr;
 
-namespace RuanFa.Shop.Domain.Categorizations.Errors;
+namespace RuanFa.Shop.Domain.Catalogs.Errors;
 
 public static partial class DomainErrors
 {

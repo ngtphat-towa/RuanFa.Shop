@@ -28,17 +28,17 @@ public static partial class DomainErrors
 
         public static Error InvalidGroupId => Error.Validation(
             code: "Product.InvalidGroupId",
-            description: "The attribute group ID cannot be empty."
+            description: "The attribute group ID must be a valid, non-empty GUID."
         );
 
         public static Error InvalidTaxClass => Error.Validation(
             code: "Product.InvalidTaxClass",
-            description: "The tax class is invalid."
+            description: "The tax class must be a valid value."
         );
 
         public static Error InvalidStatus => Error.Validation(
             code: "Product.InvalidStatus",
-            description: "The product status is invalid."
+            description: "The product status must be a valid value."
         );
 
         public static Error InvalidStatusTransition(ProductStatus currentStatus, ProductStatus targetStatus, string description) => Error.Conflict(
@@ -73,7 +73,7 @@ public static partial class DomainErrors
 
         public static Error InvalidAttributeGroup => Error.Validation(
             code: "Product.InvalidAttributeGroup",
-            description: "The specified attribute group is invalid or does not exist."
+            description: "The specified attribute group does not exist."
         );
 
         public static Error CannotDeleteActiveProduct => Error.Conflict(
@@ -105,5 +105,16 @@ public static partial class DomainErrors
             code: "Product.DuplicateImageUrl",
             description: "An image with the same URL is already associated with this product."
         );
+
+        public static Error CannotRemoveDefaultVariant => Error.Conflict(
+            code: "Product.CannotRemoveDefaultVariant",
+            description: "The default variant cannot be removed unless another variant is set as default."
+        );
+
+        public static Error CannotRemoveDefaultImage => Error.Conflict(
+            code: "Product.CannotRemoveDefaultImage",
+            description: "The default image cannot be removed unless another image is set as default."
+        );
     }
+
 }

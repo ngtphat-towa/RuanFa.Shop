@@ -1,8 +1,8 @@
 ﻿using ErrorOr;
-using RuanFa.Shop.Domain.Categorizations.Errors;
+using RuanFa.Shop.Domain.Catalogs.Errors;
 using RuanFa.Shop.SharedKernel.Models.Domains;
 
-namespace RuanFa.Shop.Domain.Categorizations.ValueObjects;
+namespace RuanFa.Shop.Domain.Catalogs.ValueObjects;
 
 public class CategoryImage : ValueObject
 {

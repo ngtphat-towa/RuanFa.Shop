@@ -8,12 +8,12 @@ public static partial class DomainErrors
     {
         public static Error InvalidProductId => Error.Validation(
             code: "ProductCategory.InvalidProductId",
-            description: "The product ID cannot be empty."
+            description: "The product ID must be a valid, non-empty GUID."
         );
 
         public static Error InvalidCategoryId => Error.Validation(
             code: "ProductCategory.InvalidCategoryId",
-            description: "The category ID cannot be empty."
+            description: "The category ID must be a valid, non-empty GUID."
         );
 
         public static Error DuplicateCategory => Error.Conflict(
@@ -26,9 +26,9 @@ public static partial class DomainErrors
             description: "The specified category was not found for this product."
         );
 
-        public static Error InvalidCategory => Error.Validation(
-            code: "ProductCategory.InvalidCategory",
-            description: "The specified category is invalid or does not exist."
+        public static Error InactiveCategory => Error.Conflict(
+            code: "ProductCategory.InactiveCategory",
+            description: "Cannot add a product to an inactive category."
         );
     }
 }

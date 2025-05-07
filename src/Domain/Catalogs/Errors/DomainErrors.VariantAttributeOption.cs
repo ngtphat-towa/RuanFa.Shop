@@ -8,12 +8,12 @@ public static partial class DomainErrors
     {
         public static Error InvalidVariantId => Error.Validation(
             code: "VariantAttributeOption.InvalidVariantId",
-            description: "The variant ID cannot be empty."
+            description: "The variant ID must be a valid, non-empty GUID."
         );
 
         public static Error InvalidAttributeOptionId => Error.Validation(
             code: "VariantAttributeOption.InvalidAttributeOptionId",
-            description: "The attribute option ID cannot be empty."
+            description: "The attribute option ID must be a valid, non-empty GUID."
         );
 
         public static Error DuplicateAttributeOption => Error.Conflict(
@@ -36,4 +36,5 @@ public static partial class DomainErrors
             description: "The attribute option does not belong to the product's attribute group."
         );
     }
+
 }

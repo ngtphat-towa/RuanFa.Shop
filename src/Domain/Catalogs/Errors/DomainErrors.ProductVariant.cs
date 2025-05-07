@@ -28,22 +28,22 @@ public static partial class DomainErrors
 
         public static Error InvalidProductId => Error.Validation(
             code: "ProductVariant.InvalidProductId",
-            description: "The product ID cannot be empty."
-        );
-
-        public static Error DuplicateAttributeOption => Error.Conflict(
-            code: "ProductVariant.DuplicateAttributeOption",
-            description: "The attribute option is already associated with this variant."
-        );
-
-        public static Error AttributeOptionNotFound => Error.NotFound(
-            code: "ProductVariant.AttributeOptionNotFound",
-            description: "The specified attribute option was not found."
+            description: "The product ID must be a valid, non-empty GUID."
         );
 
         public static Error InsufficientStock => Error.Conflict(
             code: "ProductVariant.InsufficientStock",
             description: "Insufficient stock available for the requested operation."
+        );
+
+        public static Error InvalidStockCheckQuantity => Error.Validation(
+            code: "ProductVariant.InvalidStockCheckQuantity",
+            description: "The quantity to check must be positive."
+        );
+
+        public static Error NegativeTotalPrice => Error.Validation(
+            code: "ProductVariant.NegativeTotalPrice",
+            description: "The total price (base price + price offset) cannot be negative."
         );
     }
 }
