@@ -5,7 +5,7 @@ using RuanFa.Shop.SharedKernel.Interfaces.Domains;
 namespace RuanFa.Shop.Infrastructure.Data.Configurations.Aduits;
 
 internal sealed class AuditableEntityConfiguration<TEntity> : IEntityTypeConfiguration<TEntity>
-    where TEntity : class, IAuditable
+    where TEntity : class, IAuditable, IHasDomainEvent
 {
     public void Configure(EntityTypeBuilder<TEntity> builder)
     {
@@ -23,5 +23,8 @@ internal sealed class AuditableEntityConfiguration<TEntity> : IEntityTypeConfigu
         builder.HasIndex(e => e.CreatedAt);
         builder.HasIndex(e => e.CreatedBy);
         builder.HasIndex(e => e.UpdatedBy);
+
+        // Ignore Domain Events
+        builder.Ignore(ca => ca.DomainEvents);
     }
 }

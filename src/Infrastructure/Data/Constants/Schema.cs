@@ -1,6 +1,6 @@
 ﻿namespace RuanFa.Shop.Infrastructure.Data.Constants;
 
-public static class TableName
+public static class Schema
 {
     public const string Users = "users";
     public const string Roles = "roles";
@@ -20,10 +20,13 @@ public static class TableName
     public const string AttributeGroupAttributes = "attribute_group_attributes";
 
     public const string Categories = "categories";
-    public const string ProductCategories = "product_categories";
+    public const string Collections = "collections";
 
     public const string Products = "products";
     public const string ProductImages = "product_images";
+    public const string ProductCollections = "product_collections";
+
     public const string Variants = "variants";
-    public const string VariantAttributeOptions = "variants_attribute_options";
+    public const string VariantAttributeValues = "variants_attribute_values";
+    public const string StockMovements = "stock_movements";
 }

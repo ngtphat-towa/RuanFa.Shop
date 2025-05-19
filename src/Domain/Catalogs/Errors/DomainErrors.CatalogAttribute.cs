@@ -68,6 +68,11 @@ public static partial class DomainErrors
                 : "The specified catalog attribute was not found."
         );
 
+        public static Error OptionNotFound => Error.NotFound(
+        code: "CatalogAttribute.OptionNotFound",
+        description: "The specified attribute option was not found."
+    );
+
         public static Error InvalidSortOrder => Error.Validation(
             code: "CatalogAttribute.InvalidSortOrder",
             description: "The sort order must be a non-negative number."

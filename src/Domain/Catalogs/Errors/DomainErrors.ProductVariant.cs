@@ -6,6 +6,16 @@ public static partial class DomainErrors
 {
     public static class ProductVariant
     {
+        public static Error InvalidId => Error.Validation(
+            code: "Product.InvalidId",
+            description: "The product ID must be a valid, non-empty GUID."
+        );
+
+        public static Error NotFound => Error.NotFound(
+            code: "ProductVariant.NotFound",
+            description: "The specified variant was not found."
+        );
+
         public static Error InvalidSku => Error.Validation(
             code: "ProductVariant.InvalidSku",
             description: "The SKU is required, must be 3-50 characters, and contain only alphanumeric characters, dashes, or underscores."

@@ -178,12 +178,14 @@ public static partial class DataConstants
             string sku,
             decimal basePrice,
             decimal weight,
-            Guid categoryId)
+            Guid categoryId,
+            decimal? salePrice = null)
         {
             var productResult = Product.Create(
                 name: name,
                 sku: sku,
                 basePrice: basePrice,
+                salePrice: salePrice ?? basePrice * 0.9m,
                 weight: weight,
                 groupId: DataConstants.AttributeGroups.GeneralGroup.Id,
                 taxClass: TaxClass.Standard,

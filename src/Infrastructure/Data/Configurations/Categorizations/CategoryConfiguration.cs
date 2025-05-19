@@ -10,7 +10,7 @@ internal class CategoryConfiguration : IEntityTypeConfiguration<Category>
     public void Configure(EntityTypeBuilder<Category> builder)
     {
         // Table Name
-        builder.ToTable(TableName.Categories);
+        builder.ToTable(Schema.Categories);
 
         // Primary Key
         builder.HasKey(t => t.Id);
@@ -36,24 +36,11 @@ internal class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.Property(t => t.ShowProducts)
             .IsRequired();
 
-        builder.Property(t => t.ShortDescription)
-            .IsRequired(false)
-            .HasMaxLength(500);
+        builder.OwnsOne(t => t.ShortDescription);
 
-        builder.Property(t => t.Description)
-            .IsRequired(false);
+        builder.OwnsOne(t => t.Description);
 
-        builder.Property(t => t.MetaTitle)
-            .IsRequired(false)
-            .HasMaxLength(60);
-
-        builder.Property(t => t.MetaKeywords)
-            .IsRequired(false)
-            .HasMaxLength(200);
-
-        builder.Property(t => t.MetaDescription)
-            .IsRequired(false)
-            .HasMaxLength(160);
+        builder.OwnsOne(t => t.SeoMeta);
 
         // Value Object: CategoryImage
         builder.OwnsOne(t => t.Image, imageBuilder =>
@@ -74,7 +61,7 @@ internal class CategoryConfiguration : IEntityTypeConfiguration<Category>
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasMany(t => t.ProductCategories)
+        builder.HasMany(t => t.Products)
             .WithOne(t => t.Category)
             .HasForeignKey(t => t.CategoryId)
             .OnDelete(DeleteBehavior.Cascade);

@@ -2,7 +2,7 @@
 using RuanFa.Shop.Domain.Catalogs.Enums;
 
 namespace RuanFa.Shop.Application.Catalogs.Attributes.Models.QueryParams;
-public record class AttributeOptionQueryParameters : QueryParameters
+public record AttributeOptionQueryParameters : QueryParameters
 {
     public Guid? AttributeId { get; init; }
     public string? AttributeCode { get; init; }

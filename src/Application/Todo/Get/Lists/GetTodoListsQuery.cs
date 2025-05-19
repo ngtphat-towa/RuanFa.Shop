@@ -32,7 +32,6 @@ internal sealed class GetTodoListsQueryHandler(IApplicationDbContext context, IM
         var paginatedList = await _context.TodoLists
           .AsQueryable()
           .AsNoTracking()
-          .ApplyFilters(request.Filters)
           .ApplySearch(predicate: m=>!string.IsNullOrEmpty(request.SearchTerm) && m.Title.Contains(request.SearchTerm))
           .ApplySort(request.SortBy, request.SortDirection)
           .ProjectToType<TodoListResult>(_mapper.Config)

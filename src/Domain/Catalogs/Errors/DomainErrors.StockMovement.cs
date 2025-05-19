@@ -6,10 +6,9 @@ public static partial class DomainErrors
 {
     public static class StockMovement
     {
-        public static Error NotFound =>
-            Error.NotFound(
-                "StockMovement.NotFound",
-                "The specified stock movement was not found.");
+        public static Error NotFound =>Error.NotFound(
+            code: "StockMovement.NotFound", 
+            description: "The specified stock movement was not found.");
 
         public static Error InvalidVariantId => Error.Validation(
             code: "StockMovement.InvalidVariantId",

@@ -4,6 +4,7 @@ using RuanFa.Shop.SharedKernel.Models.Domains;
 using RuanFa.Shop.Domain.Catalogs.ValueObjects;
 using RuanFa.Shop.SharedKernel.Interfaces.Domains;
 using RuanFa.Shop.Domain.Catalogs.AggregateRoots;
+using RuanFa.Shop.Domain.Catalogs.Enums;
 
 namespace RuanFa.Shop.Domain.Catalogs.Entities;
 
@@ -11,6 +12,8 @@ public class ProductImage : Entity<Guid>
 {
     #region Properties
     public ImageData Image { get; private set; } = null!;
+    public ImageType ImageType { get; private set; }
+
     public bool IsDefault { get; private set; }
     #endregion
 

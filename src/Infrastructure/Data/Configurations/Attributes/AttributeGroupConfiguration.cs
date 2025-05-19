@@ -10,7 +10,7 @@ internal sealed class AttributeGroupConfiguration : IEntityTypeConfiguration<Att
     public void Configure(EntityTypeBuilder<AttributeGroup> builder)
     {
         // Table name
-        builder.ToTable(TableName.AttributeGroups);
+        builder.ToTable(Schema.AttributeGroups);
 
         // Primary key
         builder.HasKey(ac => ac.Id);

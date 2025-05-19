@@ -23,8 +23,10 @@ public class CatalogAttribute : AggregateRoot<Guid>
     #region Relationships
     private readonly List<AttributeOption> _attributeOptions = new();
     private readonly List<AttributeGroupAttribute> _attributeGroupAttributes = new();
+    private readonly List<VariantAttributeValue> _variantAttributeValues = new();
     public IReadOnlyCollection<AttributeOption> AttributeOptions => _attributeOptions.AsReadOnly();
     public IReadOnlyCollection<AttributeGroupAttribute> AttributeGroupAttributes => _attributeGroupAttributes.AsReadOnly();
+    public IReadOnlyCollection<VariantAttributeValue> VariantAttributeValues => _variantAttributeValues.AsReadOnly();
     #endregion
 
     #region Constructor
@@ -62,25 +64,18 @@ public class CatalogAttribute : AggregateRoot<Guid>
     {
         if (string.IsNullOrWhiteSpace(code))
             return DomainErrors.CatalogAttribute.EmptyCode;
-
         if (code.Length < 3)
             return DomainErrors.CatalogAttribute.CodeTooShort;
-
         if (code.Length > 50)
             return DomainErrors.CatalogAttribute.CodeTooLong;
-
         if (!Regex.IsMatch(code, @"^[a-zA-Z0-9\-_]+$"))
             return DomainErrors.CatalogAttribute.InvalidCodeFormat;
-
         if (string.IsNullOrWhiteSpace(name))
             return DomainErrors.CatalogAttribute.EmptyName;
-
         if (name.Length > 100)
             return DomainErrors.CatalogAttribute.NameTooLong;
-
         if (!Enum.IsDefined(typeof(AttributeType), type) || type == AttributeType.None)
             return DomainErrors.CatalogAttribute.InvalidType;
-
         if (sortOrder < 0)
             return DomainErrors.CatalogAttribute.InvalidSortOrder;
 
@@ -100,40 +95,38 @@ public class CatalogAttribute : AggregateRoot<Guid>
 
     #region Methods
     public ErrorOr<Updated> Update(
-        string? attributeCode = null,
-        string? attributeName = null,
+        string? code = null,
+        string? name = null,
         AttributeType? type = null,
         bool? isRequired = null,
         bool? displayOnFrontend = null,
         int? sortOrder = null,
         bool? isFilterable = null)
     {
-        if (attributeCode != null)
+        if (code != null)
         {
-            if (string.IsNullOrWhiteSpace(attributeCode))
+            if (string.IsNullOrWhiteSpace(code))
                 return DomainErrors.CatalogAttribute.EmptyCode;
 
-            if (attributeCode.Length < 3)
+            if (code.Length < 3)
                 return DomainErrors.CatalogAttribute.CodeTooShort;
 
-            if (attributeCode.Length > 50)
+            if (code.Length > 50)
                 return DomainErrors.CatalogAttribute.CodeTooLong;
 
-            if (!Regex.IsMatch(attributeCode, @"^[a-zA-Z0-9\-_]+$"))
+            if (!Regex.IsMatch(code, @"^[a-zA-Z0-9\-_]+$"))
                 return DomainErrors.CatalogAttribute.InvalidCodeFormat;
-
-            Code = attributeCode;
+            Code = code;
         }
 
-        if (attributeName != null)
+        if (name != null)
         {
-            if (string.IsNullOrWhiteSpace(attributeName))
+            if (string.IsNullOrWhiteSpace(name))
                 return DomainErrors.CatalogAttribute.EmptyName;
 
-            if (attributeName.Length > 100)
+            if (name.Length > 100)
                 return DomainErrors.CatalogAttribute.NameTooLong;
-
-            Name = attributeName;
+            Name = name;
         }
 
         if (type != null)
@@ -141,8 +134,8 @@ public class CatalogAttribute : AggregateRoot<Guid>
             if (!Enum.IsDefined(typeof(AttributeType), type.Value) || type == AttributeType.None)
                 return DomainErrors.CatalogAttribute.InvalidType;
 
-            if (!_attributeOptions.Any() && (type == AttributeType.Dropdown || type == AttributeType.Swatch))
-                return DomainErrors.CatalogAttribute.TypeRequiresOptions;
+            if (_attributeOptions.Any() && type != AttributeType.Dropdown && type != AttributeType.Select && type != AttributeType.Swatch)
+                return DomainErrors.CatalogAttribute.OptionsNotSupportedForType;
 
             Type = type.Value;
         }
@@ -157,7 +150,6 @@ public class CatalogAttribute : AggregateRoot<Guid>
         {
             if (sortOrder < 0)
                 return DomainErrors.CatalogAttribute.InvalidSortOrder;
-
             SortOrder = sortOrder.Value;
         }
 
@@ -168,9 +160,9 @@ public class CatalogAttribute : AggregateRoot<Guid>
         return Result.Updated;
     }
 
-    public ErrorOr<AttributeOption> AddOption(string optionText, string? code = null)
+    public ErrorOr<AttributeOption> AddOption(string optionText)
     {
-        if ((Type != AttributeType.Dropdown && Type != AttributeType.Swatch) && _attributeOptions.Any())
+        if (Type != AttributeType.Dropdown && Type != AttributeType.Select && Type != AttributeType.Swatch)
             return DomainErrors.CatalogAttribute.OptionsNotSupportedForType;
 
         var optionResult = AttributeOption.Create(
@@ -190,21 +182,31 @@ public class CatalogAttribute : AggregateRoot<Guid>
     {
         var option = _attributeOptions.FirstOrDefault(o => o.Id == optionId);
         if (option == null)
-            return DomainErrors.AttributeOption.NotFound;
+            return DomainErrors.CatalogAttribute.OptionNotFound;
 
         _attributeOptions.Remove(option);
         AddDomainEvent(new CatalogAttributeOptionRemovedEvent(Id, optionId));
+        return Result.Updated;
+    }
+
+    public ErrorOr<Updated> RemoveAllOptions()
+    {
+        var removedOptionIds = _attributeOptions.Select(o => o.Id).ToList();
+        _attributeOptions.Clear();
+
+        foreach (var optionId in removedOptionIds)
+        {
+            AddDomainEvent(new CatalogAttributeOptionRemovedEvent(Id, optionId));
+        }
+
         return Result.Updated;
     }
     #endregion
 
     #region Domain Events
     public record CatalogAttributeCreatedEvent(Guid AttributeId, string Code, string Name, AttributeType Type) : IDomainEvent;
-
     public record CatalogAttributeUpdatedEvent(Guid AttributeId, string Code, string Name, AttributeType Type) : IDomainEvent;
-
     public record CatalogAttributeOptionAddedEvent(Guid AttributeId, Guid OptionId, string OptionText) : IDomainEvent;
-
     public record CatalogAttributeOptionRemovedEvent(Guid AttributeId, Guid OptionId) : IDomainEvent;
     #endregion
 }

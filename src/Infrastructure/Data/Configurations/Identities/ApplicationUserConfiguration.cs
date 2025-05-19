@@ -11,7 +11,7 @@ internal class ApplicationUserConfiguration : IEntityTypeConfiguration<Applicati
     public void Configure(EntityTypeBuilder<ApplicationUser> builder)
     {
         // Table name
-        builder.ToTable(TableName.Users);
+        builder.ToTable(Schema.Users);
         builder.HasOne(u => u.Profile)
             .WithOne()
             .HasForeignKey<UserProfile>(up => up.UserId)

@@ -11,7 +11,7 @@ internal class UserProfileConfiguration : IEntityTypeConfiguration<UserProfile>
 {
     public void Configure(EntityTypeBuilder<UserProfile> builder)
     {
-        builder.ToTable(TableName.UserProfile);
+        builder.ToTable(Schema.UserProfile);
         builder.HasKey(e => e.Id);
         builder.HasIndex(e => e.UserId).IsUnique();
         builder.Property(e => e.UserId).IsRequired();
@@ -20,22 +20,22 @@ internal class UserProfileConfiguration : IEntityTypeConfiguration<UserProfile>
         builder.Property(e => e.LoyaltyPoints).IsRequired();
         builder.Property(e => e.MarketingConsent).IsRequired();
 
-        // Value converter for Addresses (List<UserAddress>)
+        // Value converter for Addresses 
         builder.Property(up => up.Addresses)
             .HasValueJsonConverter()
             .HasColumnType("TEXT");
 
-        // Value converter for Preferences (FashionPreferences)
+        // Value converter for Preferences
         builder.Property(up => up.Preferences)
              .HasValueJsonConverter()
              .HasColumnType("TEXT");
 
-        // Value converter for Wishlist (List<string>)
+        // Value converter for Wishlist 
         builder.Property(e => e.Wishlist)
             .HasValueJsonConverter()
             .HasColumnType("TEXT");
 
-        // Configure one-to-many with Order (optional relationship)
+        // Configure one-to-many with Order 
         builder.HasMany(e => e.Orders)
             .WithOne(e => e.Profile)
             .HasForeignKey(e => e.Id)

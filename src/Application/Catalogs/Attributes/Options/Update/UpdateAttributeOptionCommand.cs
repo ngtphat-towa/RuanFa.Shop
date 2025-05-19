@@ -12,7 +12,6 @@ namespace RuanFa.Shop.Application.Catalogs.Attributes.Options.Update;
 public record UpdateAttributeOptionCommand : ICommand<Updated>
 {
     public required Guid Id { get; init; }
-    public string? Code { get; init; }
     public string? OptionText { get; init; }
 }
 

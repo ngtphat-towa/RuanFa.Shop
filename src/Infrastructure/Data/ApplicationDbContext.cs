@@ -28,6 +28,18 @@ internal class ApplicationDbContext(DbContextOptions<ApplicationDbContext> optio
     public DbSet<AttributeGroup> AttributeGroups => Set<AttributeGroup>();
     public DbSet<AttributeGroupAttribute> AttributeGroupAttributes => Set<AttributeGroupAttribute>();
 
+    // Categories
+    public DbSet<Category> Categories => Set<Category>();
+    public DbSet<CatalogCollection> Collections => Set<CatalogCollection>();
+
+    // Products
+    public DbSet<Product> Products => Set<Product>();
+    public DbSet<ProductVariant> Variants => Set<ProductVariant>();
+    public DbSet<VariantAttributeValue> VariantAttributeValues => Set<VariantAttributeValue>();
+    public DbSet<ProductImage> ProductImages => Set<ProductImage>();
+    public DbSet<ProductCollection> ProductCollections => Set<ProductCollection>();
+
+    public DbSet<StockMovement> StockMovements => Set<StockMovement>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

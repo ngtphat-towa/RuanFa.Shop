@@ -10,13 +10,13 @@ internal sealed class AttributeOptionConfiguration : IEntityTypeConfiguration<At
     public void Configure(EntityTypeBuilder<AttributeOption> builder)
     {
         // Table Name
-        builder.ToTable(TableName.AttributeOptions);
+        builder.ToTable(Schema.AttributeOptions);
 
         // Primary Key
         builder.HasKey(t => t.Id);
 
         // Properties
-        builder.Property(t => t.OptionText)
+        builder.Property(t => t.OptionValue)
             .IsRequired()
             .HasMaxLength(100);
 
@@ -26,7 +26,7 @@ internal sealed class AttributeOptionConfiguration : IEntityTypeConfiguration<At
             .HasForeignKey(t => t.AttributeId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasIndex(av => new { av.Code, av.OptionText })
+        builder.HasIndex(av => av.OptionValue)
             .IsUnique();
 
     }

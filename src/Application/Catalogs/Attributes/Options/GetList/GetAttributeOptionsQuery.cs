@@ -28,7 +28,7 @@ internal sealed class GetAttributeOptionsQueryHandler(IApplicationDbContext cont
     {
         var query = _context.AttributeOptions
             .Include(o => o.Attribute)
-            .Include(o => o.VariantAttributeOptions)
+            .Include(o => o.VariantAttributeValues)
             .AsQueryable()
             .AsNoTracking()
 ;
@@ -39,7 +39,7 @@ internal sealed class GetAttributeOptionsQueryHandler(IApplicationDbContext cont
         }
         if (!string.IsNullOrEmpty(request.AttributeCode))
         {
-            query = query.Where(o => o.Code == request.AttributeCode);
+            query = query.Where(o => o.Attribute.Code == request.AttributeCode);
         }
         if (request.Type.HasValue)
         {
@@ -60,10 +60,8 @@ internal sealed class GetAttributeOptionsQueryHandler(IApplicationDbContext cont
 
         var paginatedList = await query
             .ApplySearch(o => string.IsNullOrEmpty(request.SearchTerm) ||
-                             string.IsNullOrEmpty(o.OptionText) ||
-                             string.IsNullOrEmpty(o.Code) ||
-                             o.OptionText.Contains(request.SearchTerm) ||
-                             o.Code.Contains(request.SearchTerm))
+                             string.IsNullOrEmpty(o.OptionValue) ||
+                             o.OptionValue.Contains(request.SearchTerm))
             .ApplySort(request.SortBy, request.SortDirection)
             .ProjectToType<AttributeOptionListResult>(_mapper.Config)
             .CreateAsync(

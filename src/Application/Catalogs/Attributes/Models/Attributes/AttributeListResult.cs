@@ -1,5 +1,5 @@
 ﻿namespace RuanFa.Shop.Application.Catalogs.Attributes.Models.Attributes;
-public record CatalogAttributeListResult
+public record AttributeListResult
 {
     public Guid Id { get; init; }
     public string Code { get; init; } = null!;

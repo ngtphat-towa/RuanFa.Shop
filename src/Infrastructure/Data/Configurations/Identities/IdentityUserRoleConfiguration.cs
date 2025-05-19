@@ -9,6 +9,6 @@ internal class IdentityUserRoleConfiguration : IEntityTypeConfiguration<Identity
 {
     public void Configure(EntityTypeBuilder<IdentityUserRole<Guid>> builder)
     {
-        builder.ToTable(TableName.UserRoles);
+        builder.ToTable(Schema.UserRoles);
     }
 }

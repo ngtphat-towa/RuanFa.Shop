@@ -45,7 +45,6 @@ internal sealed class GetAttributeGroupsQueryHandler(IApplicationDbContext conte
                              g.Name.Contains(request.SearchTerm));
 
         var paginatedList = await paginatedListQuery
-            .ApplyFilters(request.Filters)
             .ApplySort(
                 sortBy: request.SortBy ?? "Name", 
                 sortDirection: request.SortDirection ?? "asc")

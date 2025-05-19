@@ -9,7 +9,10 @@ using RuanFa.Shop.SharedKernel.Interfaces.Messaging;
 namespace RuanFa.Shop.Application.Catalogs.Attributes.Options.Delete;
 
 [ApiAuthorize(Permission.AttributeOption.Delete)]
-public record DeleteAttributeOptionCommand(Guid Id) : ICommand<Deleted>;
+public record DeleteAttributeOptionCommand : ICommand<Deleted>
+{
+    public Guid Id { get; set; }
+}
 
 internal sealed class DeleteAttributeOptionCommandHandler(IApplicationDbContext context)
     : ICommandHandler<DeleteAttributeOptionCommand, Deleted>

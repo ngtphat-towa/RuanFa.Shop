@@ -10,7 +10,7 @@ internal class ProductImageConfiguration : IEntityTypeConfiguration<ProductImage
     public void Configure(EntityTypeBuilder<ProductImage> builder)
     {
         // Table name
-        builder.ToTable(TableName.ProductImages);
+        builder.ToTable(Schema.ProductImages);
 
         // Primary key
         builder.HasKey(p => p.Id);
@@ -46,9 +46,7 @@ internal class ProductImageConfiguration : IEntityTypeConfiguration<ProductImage
                 .HasMaxLength(125);
 
             image.Property(i => i.Width);
-
             image.Property(i => i.Height);
-
             image.Property(i => i.FileSizeBytes);
         });
 

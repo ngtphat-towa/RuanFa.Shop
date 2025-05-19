@@ -17,17 +17,15 @@ namespace RuanFa.Shop.Application.Catalogs.Attributes.GetList;
 [ApiAuthorize(Permission.Attribute.Get)]
 public record GetCatalogAttributesQuery :
     CatalogAttributeQueryParameters,
-    IQuery<PaginatedList<CatalogAttributeListResult>>
-{
-}
+    IQuery<PaginatedList<AttributeListResult>>;
 
 internal sealed class GetCatalogAttributesQueryHandler(IApplicationDbContext context, IMapper mapper)
-    : IQueryHandler<GetCatalogAttributesQuery, PaginatedList<CatalogAttributeListResult>>
+    : IQueryHandler<GetCatalogAttributesQuery, PaginatedList<AttributeListResult>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
 
-    public async Task<ErrorOr<PaginatedList<CatalogAttributeListResult>>> Handle(
+    public async Task<ErrorOr<PaginatedList<AttributeListResult>>> Handle(
         GetCatalogAttributesQuery request,
         CancellationToken cancellationToken)
     {
@@ -43,29 +41,33 @@ internal sealed class GetCatalogAttributesQueryHandler(IApplicationDbContext con
             paginatedListQuery = paginatedListQuery
                 .ApplySearch(g => string.IsNullOrEmpty(g.Name) ||
                              g.Name.Contains(request.SearchTerm));
+
         // Filter: IsFilterable
         if (request.IsFilterable.HasValue)
             paginatedListQuery = paginatedListQuery
                 .Where(m => m.IsFilterable == request.IsFilterable);
+
         // Filter: IsRequired
         if (request.IsRequired.HasValue)
             paginatedListQuery = paginatedListQuery
                 .Where(m => m.IsRequired == request.IsRequired);
-        // Filter: IsRequired
+
+        // Filter: DisplayOnFrontend
         if (request.DisplayOnFrontend.HasValue)
             paginatedListQuery = paginatedListQuery
                 .Where(m => m.DisplayOnFrontend == request.DisplayOnFrontend);
-        // Filter: IsRequired
-        if (request.Type != null && request.Type.Count != 0)
+
+        // Filter: Type
+        if (request.Type != null && 
+            request.Type.All(m => m.HasValue))
             paginatedListQuery = paginatedListQuery
                 .Where(m => request.Type.Contains(m.Type));
 
         var paginatedList = await paginatedListQuery
-            .ApplyFilters(request.Filters)
             .ApplySort(
                 sortBy: request.SortBy ?? "SortOrder",
                 sortDirection: request.SortDirection ?? "asc")
-            .ProjectToType<CatalogAttributeListResult>(_mapper.Config)
+            .ProjectToType<AttributeListResult>(_mapper.Config)
             .CreateAsync(
                 request.PageIndex,
                 request.PageSize,

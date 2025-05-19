@@ -3,6 +3,7 @@ using RuanFa.Shop.Domain.Catalogs.Entities;
 using RuanFa.Shop.Domain.Catalogs.Enums;
 using RuanFa.Shop.Domain.Catalogs.Errors;
 using RuanFa.Shop.Domain.Catalogs.ValueObjects;
+using RuanFa.Shop.Domain.Commons.ValueObjects;
 using RuanFa.Shop.SharedKernel.Interfaces.Domains;
 using RuanFa.Shop.SharedKernel.Models.Domains;
 using System.Text.RegularExpressions;
@@ -12,10 +13,20 @@ namespace RuanFa.Shop.Domain.Catalogs.AggregateRoots;
 public class Product : AggregateRoot<Guid>
 {
     #region Properties
+    // General
     public string Name { get; private set; } = null!;
     public string Sku { get; private set; } = null!;
+
+    // Descriptions
+    public List<DescriptionData>? Descriptions { get; private set; } = null!;
+
+    // Pricing
     public decimal BasePrice { get; private set; }
+    public decimal? SalePrice { get; private set; }
+
+    public bool IsFeatured { get; private set; }
     public decimal Weight { get; private set; }
+
     public TaxClass TaxClass { get; private set; } = TaxClass.None;
     public ProductStatus Status { get; private set; } = ProductStatus.Draft;
     #endregion
@@ -23,12 +34,15 @@ public class Product : AggregateRoot<Guid>
     #region Relationships
     public Guid GroupId { get; private set; }
     public AttributeGroup Group { get; private set; } = null!;
-    private readonly List<ProductCategory> _productCategories = new();
+    public Guid? CategoryId { get; private set; }
+    public Category? Category { get; private set; } = null!;
+
     private readonly List<ProductVariant> _variants = new();
     private readonly List<ProductImage> _images = new();
-    public IReadOnlyCollection<ProductCategory> ProductCategories => _productCategories.AsReadOnly();
+    private readonly List<ProductCollection> _productCollections = new();
     public IReadOnlyCollection<ProductVariant> Variants => _variants.AsReadOnly();
     public IReadOnlyCollection<ProductImage> Images => _images.AsReadOnly();
+    public IReadOnlyCollection<ProductCollection> ProductCollections => _productCollections.AsReadOnly();
     #endregion
 
     #region Constructor
@@ -38,19 +52,23 @@ public class Product : AggregateRoot<Guid>
         string name,
         string sku,
         decimal basePrice,
+        decimal? salePrice,
         decimal weight,
         Guid groupId,
         TaxClass taxClass,
-        ProductStatus status)
+        ProductStatus status,
+        List<DescriptionData>? descriptions = null)
     {
         Id = Guid.NewGuid();
         Name = name;
         Sku = sku;
         BasePrice = basePrice;
+        SalePrice = salePrice;
         Weight = weight;
         GroupId = groupId;
         TaxClass = taxClass;
         Status = status;
+        Descriptions = descriptions;
     }
     #endregion
 
@@ -59,10 +77,12 @@ public class Product : AggregateRoot<Guid>
         string name,
         string sku,
         decimal basePrice,
+        decimal? salePrice,
         decimal weight,
         Guid groupId,
         TaxClass taxClass = TaxClass.None,
-        ProductStatus status = ProductStatus.Draft)
+        ProductStatus status = ProductStatus.Draft,
+        List<DescriptionData>? descriptions = null)
     {
         if (string.IsNullOrWhiteSpace(name) || name.Length < 3 || name.Length > 100)
             return DomainErrors.Product.InvalidName;
@@ -72,6 +92,12 @@ public class Product : AggregateRoot<Guid>
 
         if (basePrice < 0)
             return DomainErrors.Product.InvalidBasePrice;
+
+        if (salePrice.HasValue && salePrice.Value < 0)
+            return DomainErrors.Product.InvalidSalePrice;
+
+        if (salePrice.HasValue && salePrice.Value > basePrice)
+            return DomainErrors.Product.SalePriceExceedsBasePrice;
 
         if (weight < 0)
             return DomainErrors.Product.InvalidWeight;
@@ -85,7 +111,7 @@ public class Product : AggregateRoot<Guid>
         if (!Enum.IsDefined(typeof(ProductStatus), status))
             return DomainErrors.Product.InvalidStatus;
 
-        var product = new Product(name, sku, basePrice, weight, groupId, taxClass, status);
+        var product = new Product(name, sku, basePrice, salePrice, weight, groupId, taxClass, status, descriptions);
         product.AddDomainEvent(new ProductCreatedEvent(product.Id, name, sku, status));
         return product;
     }
@@ -96,9 +122,11 @@ public class Product : AggregateRoot<Guid>
         string? name = null,
         string? sku = null,
         decimal? basePrice = null,
+        decimal? salePrice = null,
         decimal? weight = null,
+        Guid? groupId = null,
         TaxClass? taxClass = null,
-        Guid? groupId = null)
+        List<DescriptionData>? descriptions = null)
     {
         if (name != null)
         {
@@ -118,13 +146,20 @@ public class Product : AggregateRoot<Guid>
         {
             if (basePrice.Value < 0)
                 return DomainErrors.Product.InvalidBasePrice;
+            if (_variants.Any(variant => basePrice.Value + variant.PriceOffset < 0))
+                return DomainErrors.ProductVariant.NegativeTotalPrice;
             BasePrice = basePrice.Value;
-            // Validate existing variants
-            foreach (var variant in _variants)
-            {
-                if (basePrice.Value + variant.PriceOffset < 0)
-                    return DomainErrors.ProductVariant.NegativeTotalPrice;
-            }
+        }
+
+        if (salePrice.HasValue)
+        {
+            if (salePrice.Value < 0)
+                return DomainErrors.Product.InvalidSalePrice;
+            if (salePrice.Value >= BasePrice)
+                return DomainErrors.Product.SalePriceExceedsBasePrice;
+            if (_variants.Any(variant => salePrice.Value + variant.PriceOffset < 0))
+                return DomainErrors.ProductVariant.NegativeTotalPrice;
+            SalePrice = salePrice.Value;
         }
 
         if (weight.HasValue)
@@ -148,6 +183,8 @@ public class Product : AggregateRoot<Guid>
             GroupId = groupId.Value;
         }
 
+        Descriptions = descriptions;
+        
         AddDomainEvent(new ProductUpdatedEvent(Id, Name, Sku, GroupId));
         return Result.Updated;
     }
@@ -157,26 +194,49 @@ public class Product : AggregateRoot<Guid>
         if (categoryId == Guid.Empty)
             return DomainErrors.ProductCategory.InvalidCategoryId;
 
-        if (_productCategories.Any(pc => pc.CategoryId == categoryId))
-            return DomainErrors.ProductCategory.DuplicateCategory;
+        if (CategoryId == categoryId)
+            return DomainErrors.ProductCategory.AlreadyAssigned;
 
-        var productCategoryResult = ProductCategory.Create(categoryId, Id);
-        if (productCategoryResult.IsError)
-            return productCategoryResult.Errors;
-
-        _productCategories.Add(productCategoryResult.Value);
+        CategoryId = categoryId;
         AddDomainEvent(new ProductCategoryAddedEvent(Id, categoryId));
         return Result.Updated;
     }
 
     public ErrorOr<Updated> RemoveCategory(Guid categoryId)
     {
-        var productCategory = _productCategories.FirstOrDefault(pc => pc.CategoryId == categoryId);
-        if (productCategory == null)
-            return DomainErrors.Category.NotFound;
+        if (CategoryId == null || CategoryId != categoryId)
+            return DomainErrors.ProductCategory.CategoryNotFound;
 
-        _productCategories.Remove(productCategory);
+        CategoryId = categoryId;
         AddDomainEvent(new ProductCategoryRemovedEvent(Id, categoryId));
+        return Result.Updated;
+    }
+
+    public ErrorOr<ProductCollection> AddCollection(Guid collectionId)
+    {
+        if (collectionId == Guid.Empty)
+            return DomainErrors.ProductCollection.InvalidCollectionId;
+
+        if (_productCollections.Any(pc => pc.CollectionId == collectionId))
+            return DomainErrors.ProductCategory.AlreadyAssigned;
+
+        var productCategoryResult = ProductCollection.Create(collectionId, Id);
+        if (productCategoryResult.IsError)
+            return productCategoryResult.Errors;
+
+        _productCollections.Add(productCategoryResult.Value);
+        AddDomainEvent(new ProductCollectionCreatedEvent(Id, collectionId));
+        return productCategoryResult.Value;
+    }
+
+    public ErrorOr<Updated> RemoveCollection(Guid collectionId)
+    {
+        var productCollection = _productCollections.FirstOrDefault(pc => pc.CollectionId == collectionId);
+        if (productCollection == null)
+            return DomainErrors.ProductCollection.CollectionNotFound;
+
+        _productCollections.Remove(productCollection);
+        AddDomainEvent(new ProductCollectionRemovedEvent(Id, collectionId));
         return Result.Updated;
     }
 
@@ -185,12 +245,21 @@ public class Product : AggregateRoot<Guid>
         decimal priceOffset,
         int stockQuantity,
         int lowStockThreshold,
-        bool isDefault = false)
+        bool isDefault = false,
+        bool? isActive = false,
+        bool? isVisible = false)
     {
         if (BasePrice + priceOffset < 0)
             return DomainErrors.ProductVariant.NegativeTotalPrice;
 
-        var variantResult = ProductVariant.Create(sku, priceOffset, stockQuantity, lowStockThreshold, Id, isDefault);
+        var variantResult = ProductVariant.Create(
+            sku,
+            priceOffset,
+            stockQuantity,
+            lowStockThreshold,
+            Id,
+            isDefault, isActive,
+             isVisible);
         if (variantResult.IsError)
             return variantResult.Errors;
 
@@ -369,6 +438,8 @@ public class Product : AggregateRoot<Guid>
     public record ProductUpdatedEvent(Guid ProductId, string Name, string Sku, Guid GroupId) : IDomainEvent;
     public record ProductCategoryAddedEvent(Guid ProductId, Guid CategoryId) : IDomainEvent;
     public record ProductCategoryRemovedEvent(Guid ProductId, Guid CategoryId) : IDomainEvent;
+    public record ProductCollectionCreatedEvent(Guid CollectionId, Guid ProductId) : IDomainEvent;
+    public record ProductCollectionRemovedEvent(Guid CollectionId, Guid ProductId) : IDomainEvent;
     public record ProductVariantAddedEvent(Guid ProductId, Guid VariantId, string Sku) : IDomainEvent;
     public record ProductVariantRemovedEvent(Guid ProductId, Guid VariantId) : IDomainEvent;
     public record ProductDefaultVariantSetEvent(Guid ProductId, Guid VariantId) : IDomainEvent;

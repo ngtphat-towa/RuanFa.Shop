@@ -1,10 +1,10 @@
-﻿using ErrorOr;
-using RuanFa.Shop.Domain.Catalogs.Entities;
-using RuanFa.Shop.Domain.Catalogs.ValueObjects;
+﻿using System.Text.RegularExpressions;
+using ErrorOr;
 using RuanFa.Shop.Domain.Catalogs.Errors;
-using RuanFa.Shop.SharedKernel.Models.Domains;
-using System.Text.RegularExpressions;
+using RuanFa.Shop.Domain.Catalogs.ValueObjects;
+using RuanFa.Shop.Domain.Commons.ValueObjects;
 using RuanFa.Shop.SharedKernel.Interfaces.Domains;
+using RuanFa.Shop.SharedKernel.Models.Domains;
 
 namespace RuanFa.Shop.Domain.Catalogs.AggregateRoots;
 
@@ -17,21 +17,22 @@ public class Category : AggregateRoot<Guid>
     public bool IncludeInNav { get; private set; }
     public short? Position { get; private set; }
     public bool ShowProducts { get; private set; }
+
     public CategoryImage? Image { get; private set; }
-    public string? ShortDescription { get; private set; }
-    public string? Description { get; private set; }
-    public string? MetaTitle { get; private set; }
-    public string? MetaKeywords { get; private set; }
-    public string? MetaDescription { get; private set; }
+    public DescriptionData? ShortDescription { get; private set; }
+    public DescriptionData? Description { get; private set; }
+    public SeoMeta? SeoMeta { get; private set; }
     #endregion
 
     #region Relationships
     public Guid? ParentId { get; private set; }
     public Category? Parent { get; private set; }
+
     private readonly List<Category> _children = new();
-    private readonly List<ProductCategory> _productCategories = new();
+    private readonly List<Product> _products = new();
+
     public IReadOnlyCollection<Category> Children => _children.AsReadOnly();
-    public IReadOnlyCollection<ProductCategory> ProductCategories => _productCategories.AsReadOnly();
+    public IReadOnlyCollection<Product> Products => _products.AsReadOnly();
     #endregion
 
     #region Constructors
@@ -45,13 +46,11 @@ public class Category : AggregateRoot<Guid>
         bool includeInNav,
         short? position,
         bool showProducts,
-        string? shortDescription,
-        string? description,
-        CategoryImage? image,
-        string? metaTitle,
-        string? metaKeywords,
-        string? metaDescription,
-        Guid? parentId)
+        Guid? parentId = null,
+        CategoryImage? image = null,
+        DescriptionData? shortDesc = null,
+        DescriptionData? description = null,
+        SeoMeta? seoMeta = null)
     {
         Id = id;
         Name = name;
@@ -60,13 +59,11 @@ public class Category : AggregateRoot<Guid>
         IncludeInNav = includeInNav;
         Position = position;
         ShowProducts = showProducts;
-        ShortDescription = shortDescription;
-        Description = description;
-        Image = image;
-        MetaTitle = metaTitle;
-        MetaKeywords = metaKeywords;
-        MetaDescription = metaDescription;
         ParentId = parentId;
+        Image = image;
+        ShortDescription = shortDesc;
+        Description = description;
+        SeoMeta = seoMeta;
     }
     #endregion
 
@@ -79,14 +76,13 @@ public class Category : AggregateRoot<Guid>
         bool includeInNav,
         short? position,
         bool showProducts,
-        string? shortDescription,
-        string? description,
-        CategoryImage? image,
-        string? metaTitle,
-        string? metaKeywords,
-        string? metaDescription,
-        Guid? parentId = null)
+        Guid? parentId = null,
+        CategoryImage? image = null,
+        DescriptionData? shortDesc = null,
+        DescriptionData? description = null,
+        SeoMeta? seoMeta = null)
     {
+        // --- Basic validation ---
         if (id == Guid.Empty)
             return DomainErrors.Category.InvalidId;
 
@@ -114,27 +110,7 @@ public class Category : AggregateRoot<Guid>
         if (position.HasValue && position < 0)
             return DomainErrors.Category.InvalidPosition;
 
-        if (shortDescription?.Length > 500)
-            return DomainErrors.Category.ShortDescriptionTooLong;
-
-        if (description?.Length > 2000)
-            return DomainErrors.Category.DescriptionTooLong;
-
-        if (metaTitle?.Length > 60)
-            return DomainErrors.Category.MetaTitleTooLong;
-
-        if (metaKeywords?.Length > 255)
-            return DomainErrors.Category.MetaKeywordsTooLong;
-
-        if (metaDescription?.Length > 160)
-            return DomainErrors.Category.MetaDescriptionTooLong;
-
-        if (image != null)
-        {
-            if (string.IsNullOrWhiteSpace(image.Url) || string.IsNullOrWhiteSpace(image.Alt))
-                return DomainErrors.Category.InvalidImage;
-        }
-
+        // --- All optional VOs (image, descriptions, seoMeta) are assumed pre-validated ---
         var category = new Category(
             id,
             name,
@@ -143,15 +119,18 @@ public class Category : AggregateRoot<Guid>
             includeInNav,
             position,
             showProducts,
-            shortDescription,
-            description,
+            parentId,
             image,
-            metaTitle,
-            metaKeywords,
-            metaDescription,
-            parentId);
+            shortDesc,
+            description,
+            seoMeta);
 
-        category.AddDomainEvent(new CategoryCreatedEvent(id, name, urlKey, parentId));
+        category.AddDomainEvent(new CategoryCreatedEvent(
+            category.Id,
+            category.Name,
+            category.UrlKey,
+            category.ParentId));
+
         return category;
     }
     #endregion
@@ -164,158 +143,76 @@ public class Category : AggregateRoot<Guid>
         bool? includeInNav = null,
         short? position = null,
         bool? showProducts = null,
-        string? shortDescription = null,
-        string? description = null,
+        Guid? parentId = null,
         CategoryImage? image = null,
-        string? metaTitle = null,
-        string? metaKeywords = null,
-        string? metaDescription = null,
-        Guid? parentId = null)
+        DescriptionData? shortDesc = null,
+        DescriptionData? description = null,
+        SeoMeta? seoMeta = null)
     {
-        if (name != null)
+        // --- Name & UrlKey ---
+        if (name is not null)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return DomainErrors.Category.EmptyName;
-
             if (name.Length < 3)
                 return DomainErrors.Category.NameTooShort;
-
             if (name.Length > 100)
                 return DomainErrors.Category.NameTooLong;
-
             Name = name;
         }
 
-        if (urlKey != null)
+        if (urlKey is not null)
         {
             if (string.IsNullOrWhiteSpace(urlKey))
                 return DomainErrors.Category.EmptyUrlKey;
-
             if (!Regex.IsMatch(urlKey, @"^[a-z0-9\-]+$"))
                 return DomainErrors.Category.InvalidUrlKeyFormat;
-
             if (urlKey.Length > 255)
                 return DomainErrors.Category.UrlKeyTooLong;
-
             UrlKey = urlKey;
         }
 
-        if (isActive.HasValue)
-            IsActive = isActive.Value;
-
-        if (includeInNav.HasValue)
-            IncludeInNav = includeInNav.Value;
+        // --- Other simple flags ---
+        if (isActive.HasValue) IsActive = isActive.Value;
+        if (includeInNav.HasValue) IncludeInNav = includeInNav.Value;
+        if (showProducts.HasValue) ShowProducts = showProducts.Value;
 
         if (position.HasValue)
         {
             if (position < 0)
                 return DomainErrors.Category.InvalidPosition;
-
             Position = position;
         }
 
-        if (showProducts.HasValue)
-            ShowProducts = showProducts.Value;
+        // --- Optional VOs ---
+        if (image is not null) Image = image;
+        if (shortDesc is not null) ShortDescription = shortDesc;
+        if (description is not null) Description = description;
+        if (seoMeta is not null) SeoMeta = seoMeta;
 
-        if (shortDescription != null)
-        {
-            if (shortDescription.Length > 500)
-                return DomainErrors.Category.ShortDescriptionTooLong;
-
-            ShortDescription = shortDescription;
-        }
-
-        if (description != null)
-        {
-            if (description.Length > 2000)
-                return DomainErrors.Category.DescriptionTooLong;
-
-            Description = description;
-        }
-
-        if (image != null)
-        {
-            if (string.IsNullOrWhiteSpace(image.Url) || string.IsNullOrWhiteSpace(image.Alt))
-                return DomainErrors.Category.InvalidImage;
-
-            Image = image;
-        }
-
-        if (metaTitle != null)
-        {
-            if (metaTitle.Length > 60)
-                return DomainErrors.Category.MetaTitleTooLong;
-
-            MetaTitle = metaTitle;
-        }
-
-        if (metaKeywords != null)
-        {
-            if (metaKeywords.Length > 255)
-                return DomainErrors.Category.MetaKeywordsTooLong;
-
-            MetaKeywords = metaKeywords;
-        }
-
-        if (metaDescription != null)
-        {
-            if (metaDescription.Length > 160)
-                return DomainErrors.Category.MetaDescriptionTooLong;
-
-            MetaDescription = metaDescription;
-        }
-
-        if (parentId != null)
+        // --- Parent linkage ---
+        if (parentId.HasValue)
         {
             if (parentId.Value == Id)
                 return DomainErrors.Category.CircularReference;
-
             ParentId = parentId;
         }
 
-        AddDomainEvent(new CategoryUpdatedEvent(Id, Name, UrlKey, ParentId));
+        AddDomainEvent(new CategoryUpdatedEvent(
+            Id,
+            Name,
+            UrlKey,
+            ParentId));
+
         return Result.Updated;
-    }
-
-    public ErrorOr<Success> AddProduct(Guid productId)
-    {
-        if (!IsActive)
-            return DomainErrors.ProductCategory.InactiveCategory;
-
-        if (productId == Guid.Empty)
-            return DomainErrors.ProductCategory.InvalidProductId;
-
-        if (ProductCategories.Any(pc => pc.ProductId == productId))
-            return DomainErrors.ProductCategory.DuplicateCategory;
-
-        var productCategoryResult = ProductCategory.Create(Id, productId);
-        if (productCategoryResult.IsError)
-            return productCategoryResult.Errors;
-
-        _productCategories.Add(productCategoryResult.Value);
-        AddDomainEvent(new CategoryProductAddedEvent(Id, productId));
-        return Result.Success;
-    }
-
-    public ErrorOr<Success> RemoveProduct(Guid productId)
-    {
-        var productCategory = _productCategories.FirstOrDefault(pc => pc.ProductId == productId);
-        if (productCategory == null)
-            return DomainErrors.Category.NotFound;
-
-        _productCategories.Remove(productCategory);
-        AddDomainEvent(new CategoryProductRemovedEvent(Id, productId));
-        return Result.Success;
     }
     #endregion
 
     #region Domain Events
-    public record CategoryCreatedEvent(Guid CategoryId, string Name, string UrlKey, Guid? ParentId) : IDomainEvent;
+    public record CategoryCreatedEvent(Guid CategoryId, string Name, string UrlKey, Guid? ParentId)
+        : IDomainEvent;
 
-    public record CategoryUpdatedEvent(Guid CategoryId, string Name, string UrlKey, Guid? ParentId) : IDomainEvent;
-
-    public record CategoryProductAddedEvent(Guid CategoryId, Guid ProductId) : IDomainEvent;
-
-    public record CategoryProductRemovedEvent(Guid CategoryId, Guid ProductId) : IDomainEvent;
+    public record CategoryUpdatedEvent(Guid CategoryId, string Name, string UrlKey, Guid? ParentId)
+        : IDomainEvent;
     #endregion
 }

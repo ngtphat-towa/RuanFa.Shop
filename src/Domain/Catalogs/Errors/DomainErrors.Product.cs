@@ -21,6 +21,14 @@ public static partial class DomainErrors
             description: "The base price must be non-negative."
         );
 
+        public static Error InvalidSalePrice => Error.Validation(
+            code: "Product.SalePrice.Invalid",
+            description: "Sale price cannot be negative.");
+
+        public static Error SalePriceExceedsBasePrice => Error.Validation(
+            code: "Product.SalePrice.ExceedsBase",
+            description: "Sale price cannot be greater than the base price.");
+
         public static Error InvalidWeight => Error.Validation(
             code: "Product.InvalidWeight",
             description: "The weight must be non-negative."
@@ -115,6 +123,15 @@ public static partial class DomainErrors
             code: "Product.CannotRemoveDefaultImage",
             description: "The default image cannot be removed unless another image is set as default."
         );
-    }
 
+        public static Error NotFound => Error.NotFound(
+            code: "Product.NotFound",
+            description: "The specified product was not found."
+        );
+
+        public static Error InvalidId => Error.Validation(
+            code: "Product.InvalidId",
+            description: "The product ID must be a valid, non-empty GUID."
+        );
+    }
 }

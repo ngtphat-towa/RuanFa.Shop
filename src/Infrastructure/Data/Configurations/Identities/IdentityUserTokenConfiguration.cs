@@ -9,6 +9,6 @@ internal class IdentityUserTokenConfiguration : IEntityTypeConfiguration<Identit
 {
     public void Configure(EntityTypeBuilder<IdentityUserToken<Guid>> builder)
     {
-        builder.ToTable(TableName.UserTokens);
+        builder.ToTable(Schema.UserTokens);
     }
 }

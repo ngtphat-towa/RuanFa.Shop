@@ -22,6 +22,7 @@ public class AttributeOptionProfile : IRegister
             .Map(dest => dest.AttributeCode,
                  src => src.Attribute.Code)
             .Map(dest => dest.VariantCount,
-                 src => src.VariantAttributeOptions.Count);
+                 src => src.VariantAttributeValues
+                    .Count(m => m.AttributeOptionId.HasValue));
     }
 }

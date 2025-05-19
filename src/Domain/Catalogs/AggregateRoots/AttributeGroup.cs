@@ -116,9 +116,7 @@ public class AttributeGroup : AggregateRoot<Guid>
 
     #region Domain Events
     public record AttributeGroupNameUpdatedEvent(Guid AttributeGroupId, string NewName) : IDomainEvent;
-
     public record AttributeAddedToGroupEvent(Guid AttributeGroupId, Guid AttributeId) : IDomainEvent;
-
     public record AttributeRemovedFromGroupEvent(Guid AttributeGroupId, Guid AttributeId) : IDomainEvent;
     #endregion
 }

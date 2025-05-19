@@ -9,6 +9,6 @@ internal class IdentityRoleClaimConfiguration : IEntityTypeConfiguration<Identit
 {
     public void Configure(EntityTypeBuilder<IdentityRoleClaim<Guid>> builder)
     {
-        builder.ToTable(TableName.RoleClaims);
+        builder.ToTable(Schema.RoleClaims);
     }
 }

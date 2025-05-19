@@ -9,20 +9,20 @@ public class CatalogAttributeProfile : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        config.NewConfig<AttributeGroup, CatalogAttributeResult.AttributeGroupResult>();
-        config.NewConfig<AttributeOption, CatalogAttributeResult.AttributeOptionResult>();
+        config.NewConfig<AttributeGroup, AttributeResult.AttributeGroupResult>();
+        config.NewConfig<AttributeOption, AttributeResult.AttributeOptionResult>();
 
-        config.NewConfig<CatalogAttribute, CatalogAttributeResult>()
+        config.NewConfig<CatalogAttribute, AttributeResult>()
             .Map(dest => dest.Groups,
                  src => src.AttributeGroupAttributes
-                 .Select(m => m.AttributeGroup.Adapt<CatalogAttributeResult.AttributeGroupResult>())
+                 .Select(m => m.AttributeGroup.Adapt<AttributeResult.AttributeGroupResult>())
                  .ToList())
             .Map(dest => dest.Groups,
                  src => src.AttributeOptions
-                 .Select(m => m.Adapt<CatalogAttributeResult.AttributeOptionResult>())
+                 .Select(m => m.Adapt<AttributeResult.AttributeOptionResult>())
                  .ToList());
 
-        config.NewConfig<CatalogAttribute, CatalogAttributeListResult>()
+        config.NewConfig<CatalogAttribute, AttributeListResult>()
             .Map(dest => dest.Type, src => (int)src.Type)
             .Map(dest => dest.OptionCount, src => src.AttributeOptions.Count)
             .Map(dest => dest.GroupCount, src => src.AttributeGroupAttributes.Count);

@@ -9,6 +9,6 @@ internal class IdentityUserLoginConfiguration : IEntityTypeConfiguration<Identit
 {
     public void Configure(EntityTypeBuilder<IdentityUserLogin<Guid>> builder)
     {
-        builder.ToTable(TableName.UserLogins);
+        builder.ToTable(Schema.UserLogins);
     }
 }

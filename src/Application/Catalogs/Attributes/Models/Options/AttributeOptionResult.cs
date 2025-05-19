@@ -6,6 +6,5 @@ public record AttributeOptionResult
     public Guid AttributeId { get; init; }
     public string? AttributeCode { get; init; }
     public string? AttributeName { get; init; }
-    public string Code { get; init; } = null!;
-    public string OptionText { get; init; } = null!;
+    public string Value { get; init; } = null!;
 }

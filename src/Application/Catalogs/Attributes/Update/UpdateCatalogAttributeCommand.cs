@@ -51,8 +51,8 @@ internal sealed class UpdateCatalogAttributeCommandHandler(IApplicationDbContext
         }
 
         var result = attribute.Update(
-            attributeCode: request.Code,
-            attributeName: request.Name,
+            code: request.Code,
+            name: request.Name,
             type: request.Type,
             isRequired: request.IsRequired,
             displayOnFrontend: request.DisplayOnFrontend,
@@ -71,7 +71,7 @@ internal sealed class UpdateCatalogAttributeCommandHandler(IApplicationDbContext
                 return DomainErrors.CatalogAttribute.OptionsNotSupportedForType;
             }
 
-            var currentOptions = attribute.AttributeOptions?.Select(o => o.OptionText).ToList() 
+            var currentOptions = attribute.AttributeOptions?.Select(o => o.OptionValue).ToList() 
                 ?? new List<string>();
             var newOptions = request.Options;
 
@@ -88,7 +88,7 @@ internal sealed class UpdateCatalogAttributeCommandHandler(IApplicationDbContext
             var optionsToRemove = currentOptions.Except(newOptions).ToList();
             foreach (var optionText in optionsToRemove)
             {
-                var option = attribute.AttributeOptions?.FirstOrDefault(o => o.OptionText == optionText);
+                var option = attribute.AttributeOptions?.FirstOrDefault(o => o.OptionValue == optionText);
                 if (option != null)
                 {
                     var removeResult = attribute.RemoveOption(option.Id);

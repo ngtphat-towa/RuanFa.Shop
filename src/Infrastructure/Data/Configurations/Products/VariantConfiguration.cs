@@ -1,67 +1,82 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using RuanFa.Shop.Domain.Catalogs.AggregateRoots;
+using RuanFa.Shop.Domain.Catalogs.Enums;
 using RuanFa.Shop.Infrastructure.Data.Constants;
 
 namespace RuanFa.Shop.Infrastructure.Data.Configurations.Products;
 
-internal class VariantConfiguration : IEntityTypeConfiguration<ProductVariant>
+public class ProductVariantConfiguration : IEntityTypeConfiguration<ProductVariant>
 {
     public void Configure(EntityTypeBuilder<ProductVariant> builder)
     {
-        // Table name
-        builder.ToTable(TableName.Variants);
-
-        // Primary key
-        builder.HasKey(v => v.Id);
+        // Table and Key
+        builder.ToTable(Schema.Variants);
+        builder.HasKey(pv => pv.Id);
 
         // Properties
-        builder.Property(v => v.Sku)
+        builder.Property(pv => pv.Id)
+            .ValueGeneratedOnAdd();
+
+        builder.Property(pv => pv.Sku)
             .IsRequired()
             .HasMaxLength(50);
 
-        builder.Property(v => v.PriceOffset)
-            .HasColumnType("decimal(18,2)")
-            .IsRequired();
+        builder.Property(pv => pv.PriceOffset)
+            .IsRequired()
+            .HasColumnType("decimal(18,2)");
 
-        builder.Property(v => v.StockQuantity)
-            .IsRequired();
+        builder.Property(pv => pv.StockQuantity)
+            .IsRequired()
+            .HasDefaultValue(0);
 
-        builder.Property(v => v.LowStockThreshold)
-            .IsRequired();
+        builder.Property(pv => pv.LowStockThreshold)
+            .IsRequired()
+            .HasDefaultValue(0);
 
-        builder.Property(v => v.StockStatus)
-            .HasConversion<int>()
-            .IsRequired();
+        builder.Property(pv => pv.StockStatus)
+            .IsRequired()
+            .HasConversion(
+                v => v.ToString(),
+                v => Enum.Parse<StockStatus>(v))
+            .HasDefaultValue(StockStatus.InStock);
 
-        builder.Property(v => v.IsActive)
-            .IsRequired();
+        builder.Property(pv => pv.IsActive)
+            .IsRequired()
+            .HasDefaultValue(true);
 
-        builder.Property(v => v.IsDefault)
+        builder.Property(pv => pv.IsDefault)
+            .IsRequired()
+            .HasDefaultValue(false);
+
+        builder.Property(pv => pv.ProductId)
             .IsRequired();
 
         // Relationships
-        builder.HasOne(v => v.Product)
+        builder.HasOne(pv => pv.Product)
             .WithMany(p => p.Variants)
-            .HasForeignKey(v => v.ProductId)
+            .HasForeignKey(pv => pv.ProductId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasMany(v => v.StockMovements)
-            .WithOne(v => v.Variant)
+        builder.HasMany(pv => pv.VariantAttributeValues)
+            .WithOne(vav => vav.Variant)
+            .HasForeignKey(vav => vav.VariantId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(pv => pv.StockMovements)
+            .WithOne(sm => sm.Variant)
             .HasForeignKey(sm => sm.VariantId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasMany(v => v.VariantAttributeOptions)
-            .WithOne(opt => opt.Variant)
-            .HasForeignKey(opt => opt.VariantId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasMany(v => v.VariantImages)
-            .WithOne(img => img.Variant)
-            .HasForeignKey(img => img.VariantId)
+        builder.HasMany(pv => pv.VariantImages)
+            .WithOne(pi => pi.Variant)
+            .HasForeignKey(pi => pi.VariantId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Indexes
-        builder.HasIndex(v => v.Sku).IsUnique();
+        builder.HasIndex(pv => pv.Sku)
+            .IsUnique();
+
+        builder.HasIndex(pv => pv.ProductId);
     }
 }

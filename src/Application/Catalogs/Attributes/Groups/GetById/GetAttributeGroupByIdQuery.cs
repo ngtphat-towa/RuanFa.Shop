@@ -12,7 +12,10 @@ using RuanFa.Shop.SharedKernel.Interfaces.Messaging;
 namespace RuanFa.Shop.Application.Catalogs.Attributes.Groups.GetById;
 
 [ApiAuthorize(Permission.AttributeGroup.Get)]
-public record GetAttributeGroupByIdQuery(Guid Id) : IQuery<AttributeGroupResult>;
+public record GetAttributeGroupByIdQuery: IQuery<AttributeGroupResult>
+{
+    public Guid Id { get; set; }
+}
 
 internal sealed class GetAttributeGroupByIdQueryHandler(IApplicationDbContext context, IMapper mapper)
     : IQueryHandler<GetAttributeGroupByIdQuery, AttributeGroupResult>

@@ -9,7 +9,7 @@ internal sealed class TodoItemConfiguration : IEntityTypeConfiguration<TodoItem>
 {
     public void Configure(EntityTypeBuilder<TodoItem> builder)
     {
-        builder.ToTable(TableName.TodoItems);
+        builder.ToTable(Schema.TodoItems);
 
         // Configure primary key (inherited from BaseAuditableEntity)
         builder.HasKey(ti => ti.Id);

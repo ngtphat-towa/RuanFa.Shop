@@ -29,7 +29,6 @@ internal sealed class GetTodoItemListsQueryHandler(IApplicationDbContext context
           .Include(m => m.List)
           .AsQueryable()
           .AsNoTracking()
-          .ApplyFilters(request.Filters)
           .Where(m => m.ListId == request.ListId)
           .ApplySearch(m => string.IsNullOrEmpty(request.SearchTerm)
                             || string.IsNullOrEmpty(m.Title)

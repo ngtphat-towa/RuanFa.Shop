@@ -9,11 +9,10 @@ internal class ApplicationRoleConfigurations : IEntityTypeConfiguration<Applicat
 {
     public void Configure(EntityTypeBuilder<ApplicationRole> builder)
     {
-        builder.ToTable(TableName.Roles);
+        builder.ToTable(Schema.Roles);
 
         // Index
         builder.HasIndex(r => r.NormalizedName)
-            .IsUnique()
-            .HasDatabaseName("RoleNameIndex");
+            .IsUnique();
     }
 }

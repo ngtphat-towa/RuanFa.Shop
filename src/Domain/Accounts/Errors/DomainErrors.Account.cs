@@ -28,6 +28,8 @@ public static partial class DomainErrors
             code: "Account.InvalidUserIdentifier",
             description: "Must be either a valid email address or username");
 
+        public static Error UserIdentifierRequired => RequiredField("UserIdentifier ");
+
         // Email Errors
         public static Error EmailRequired => RequiredField("Email");
         public static Error InvalidEmailFormat => InvalidFieldFormat("Email");

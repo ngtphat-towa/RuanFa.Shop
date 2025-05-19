@@ -22,5 +22,18 @@ public interface IApplicationDbContext
     DbSet<AttributeGroup> AttributeGroups { get; }
     DbSet<AttributeGroupAttribute> AttributeGroupAttributes { get; }
 
+    // Categorization
+    DbSet<Category> Categories { get; }
+    DbSet<CatalogCollection> Collections { get; }
+    // Products
+    DbSet<Product> Products { get; }
+    DbSet<ProductVariant> Variants { get; }
+    DbSet<ProductImage> ProductImages { get; }
+    DbSet<VariantAttributeValue> VariantAttributeValues { get; }
+    DbSet<ProductCollection> ProductCollections { get; }
+
+    // Tracking
+    DbSet<StockMovement> StockMovements { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

@@ -12,15 +12,17 @@ public static class DependencyInjection
     {
         services.AddControllers();
         services.AddCarter();
-        services.AddOpenApi(options => options.AddDocumentTransformer<BearerSecuritySchemeTransformer>());
+        services.AddOpenApi(options => options
+            .AddDocumentTransformer<BearerSecuritySchemeTransformer>());
         services.AddCors(options => options.AddPolicy("AllowAngularDevServer",
                 policy => policy.WithOrigins("http://localhost:4200")
-                            .AllowAnyHeader()
-                            .AllowAnyMethod()));
+                .AllowAnyHeader()
+                .AllowAnyMethod()));
         services.AddEndpointsApiExplorer();
         services.AddSwaggerWithAuth();
         services.AddExceptionHandler<GlobalExceptionHandler>();
-        services.AddProblemDetails();
+        services.AddProblemDetails(ConfigureProblemDetails);
+
         services.AddSession(options =>
         {
             options.IdleTimeout = TimeSpan.FromDays(30); // Session expiry
@@ -43,11 +45,7 @@ public static class DependencyInjection
             {
                 options.WithOpenApiRoutePattern("/openapi/v1.json");
                 options.Theme = ScalarTheme.None;
-                options.Authentication =
-                    new ScalarAuthenticationOptions
-                    {
-                        PreferredSecurityScheme = "Bearer"
-                    };
+                options.AddPreferredSecuritySchemes("Bearer");
             });
 
         }
@@ -70,4 +68,15 @@ public static class DependencyInjection
         return app;
     }
 
+    private static void ConfigureProblemDetails(ProblemDetailsOptions options)
+    {
+        options.CustomizeProblemDetails = context =>
+        {
+            var traceId = context.HttpContext.TraceIdentifier;
+            var userAgent = context.HttpContext.Request.Headers.UserAgent.ToString();
+
+            context.ProblemDetails.Extensions["traceId"] = traceId;
+            context.ProblemDetails.Extensions["userAgent"] = userAgent;
+        };
+    }
 }

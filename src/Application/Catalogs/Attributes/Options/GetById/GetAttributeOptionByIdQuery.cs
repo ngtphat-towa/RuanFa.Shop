@@ -13,7 +13,10 @@ namespace RuanFa.Shop.Application.Catalogs.Attributes.Options.GetById;
 
 
 [ApiAuthorize(Permission.AttributeOption.Get)]
-public record GetAttributeOptionByIdQuery(Guid Id) : IQuery<AttributeOptionResult>;
+public record GetAttributeOptionByIdQuery: IQuery<AttributeOptionResult>
+{
+    public Guid Id { get; set; }
+}
 internal sealed class GetAttributeOptionByIdQueryHandler(IApplicationDbContext context, IMapper mapper)
     : IQueryHandler<GetAttributeOptionByIdQuery, AttributeOptionResult>
 {

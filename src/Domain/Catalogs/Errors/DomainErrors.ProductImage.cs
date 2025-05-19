@@ -61,9 +61,9 @@ public static partial class DomainErrors
             description: "The specified image was not found."
         );
 
-        public static Error CannotSetDefaultForNonExistentImage => Error.Conflict(
-            code: "ProductImage.CannotSetDefaultForNonExistentImage",
-            description: "Cannot set an image as default if it does not exist."
+        public static Error MultipleDefaultImages => Error.Validation(
+         code: "ProductImage.MultipleDefaultImages",
+         description: "Only one image can be marked as default."
         );
 
         public static Error InvalidMimeType => Error.Validation(

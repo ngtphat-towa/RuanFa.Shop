@@ -5,8 +5,8 @@ namespace RuanFa.Shop.Application.Catalogs.Attributes.Models.QueryParams;
 
 public record CatalogAttributeQueryParameters : QueryParameters
 {
-    public List<AttributeType>? Type { get; init; }
-    public bool? IsRequired { get; init; }
-    public bool? DisplayOnFrontend { get; init; }
-    public bool? IsFilterable { get; init; }
+    public AttributeType?[]? Type { get; set; }
+    public bool? IsRequired { get; set; }
+    public bool? DisplayOnFrontend { get; set; }
+    public bool? IsFilterable { get; set; }
 }

@@ -10,15 +10,17 @@ internal class LoginQueryValidator : AbstractValidator<LoginQuery>
     {
         // Basic non-empty validation
         RuleFor(x => x.UserIdentifier)
-            .Cascade(CascadeMode.Stop)
             .NotEmpty()
+            .WithMessage(DomainErrors.Account.UserIdentifierRequired.Description)
+            .WithErrorCode(DomainErrors.Account.UserIdentifierRequired.Code)
             .Must(BeEmailOrUsername)
             .WithMessage(DomainErrors.Account.InvalidUserIdentifier.Description)
             .WithErrorCode(DomainErrors.Account.InvalidUserIdentifier.Code)
             .When(x => !string.IsNullOrEmpty(x.UserIdentifier));
 
         // Email format validation (when '@' is present)
-        When(x => x.UserIdentifier.Contains('@'), () => RuleFor(x => x.UserIdentifier)
+        When(x => !string.IsNullOrEmpty(x.UserIdentifier) && 
+                x.UserIdentifier.Contains('@'), () => RuleFor(x => x.UserIdentifier)
                 .EmailAddress()
                 .WithMessage(DomainErrors.Account.InvalidEmailFormat.Description)
                 .WithErrorCode(DomainErrors.Account.InvalidEmailFormat.Code));

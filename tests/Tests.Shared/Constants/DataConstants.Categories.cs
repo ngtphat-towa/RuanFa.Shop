@@ -10,11 +10,14 @@ public static partial class DataConstants
         // Apparel (Master)
         public static readonly Guid ApparelId = Guid.Parse("10000000-0000-0000-0000-000000000001");
         public static readonly Category Apparel = Category.Create(
-            ApparelId, "Apparel", "apparel", true, true, 0, false,
-            "Apparel overview", "All clothing types",
-            CategoryImage.Create("apparel.jpg", "Apparel").Value,
-            "Apparel Meta Title", "clothing, fashion", "Meta description for apparel"
-        ).Value;
+            id: ApparelId,
+            name: "Apparel",
+            urlKey: "apparel",
+            isActive: true,
+            includeInNav: true,
+            position: 0,
+            showProducts: false,
+            image: CategoryImage.Create("apparel.jpg", "Apparel").Value).Value;
 
         public static readonly Category Jackets = CreateSubCategory("Jackets", "apparel/jackets", ApparelId, 1, "jackets.jpg");
         public static readonly Category TShirts = CreateSubCategory("T-Shirts", "apparel/t-shirts", ApparelId, 2, "tshirts.jpg");
@@ -24,12 +27,14 @@ public static partial class DataConstants
 
         // Footwear (Master)
         public static readonly Guid FootwearId = Guid.Parse("20000000-0000-0000-0000-000000000001");
-        public static readonly Category Footwear = Category.Create(
-            FootwearId, "Footwear", "footwear", true, true, 0, false,
-            "Shoes and more", "Explore all kinds of footwear",
-            CategoryImage.Create("footwear.jpg", "Footwear").Value,
-            "Footwear Meta", "shoes, sneakers", "Meta desc"
-        ).Value;
+        public static readonly Category Footwear = Category.Create(id: FootwearId,
+            name: "Footwear",
+            urlKey: "footwear",
+            isActive: true,
+            includeInNav: true,
+            position: 0,
+            showProducts: false,
+            image: CategoryImage.Create("footwear.jpg", "Footwear").Value).Value;
 
         public static readonly Category Sneakers = CreateSubCategory("Sneakers", "footwear/sneakers", FootwearId, 1, "sneakers.jpg");
         public static readonly Category Boots = CreateSubCategory("Boots", "footwear/boots", FootwearId, 2, "boots.jpg");
@@ -39,10 +44,14 @@ public static partial class DataConstants
         // Accessories (Master)
         public static readonly Guid AccessoriesId = Guid.Parse("30000000-0000-0000-0000-000000000001");
         public static readonly Category Accessories = Category.Create(
-            AccessoriesId, "Accessories", "accessories", true, true, 0, false,
-            "Finish your look", "Bags, belts, and more",
-            CategoryImage.Create("accessories.jpg", "Accessories").Value,
-            "Accessories Meta", "accessories, bags", "Accessories meta desc"
+            id: AccessoriesId,
+            name: "Accessories",
+            urlKey: "accessories",
+            isActive: true,
+            includeInNav: true,
+            position: 0,
+            showProducts: false,
+            image: CategoryImage.Create("accessories.jpg", "Accessories").Value
         ).Value;
 
         public static readonly Category Bags = CreateSubCategory("Bags", "accessories/bags", AccessoriesId, 1, "bags.jpg");
@@ -52,11 +61,11 @@ public static partial class DataConstants
 
         // Collection
         public static readonly List<Category> DefaultCategories = new()
-    {
-        Apparel, Jackets, TShirts, Pants, Dresses, Hoodies,
-        Footwear, Sneakers, Boots, Sandals, FormalShoes,
-        Accessories, Bags, Belts, Hats, Sunglasses
-    };
+        {
+            Apparel, Jackets, TShirts, Pants, Dresses, Hoodies,
+            Footwear, Sneakers, Boots, Sandals, FormalShoes,
+            Accessories, Bags, Belts, Hats, Sunglasses
+        };
 
         private static Category CreateSubCategory(string name, string urlKey, Guid parentId, short position, string imageFile)
         {
@@ -68,12 +77,7 @@ public static partial class DataConstants
                 includeInNav: true,
                 position: position,
                 showProducts: true,
-                shortDescription: $"Browse {name}",
-                description: $"{name} in our fashion store",
                 image: CategoryImage.Create(imageFile, name).Value,
-                metaTitle: $"Buy {name} Online",
-                metaKeywords: $"{name.ToLower()}",
-                metaDescription: $"Top quality {name.ToLower()}",
                 parentId: parentId
             ).Value;
         }

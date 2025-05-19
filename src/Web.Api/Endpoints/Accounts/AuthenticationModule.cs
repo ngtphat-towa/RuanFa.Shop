@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using RuanFa.Shop.Application.Accounts.Authentication.Login;
 using RuanFa.Shop.Application.Accounts.Authentication.Register;
 using RuanFa.Shop.Application.Accounts.Authentication.RefreshToken;
-using RuanFa.Shop.Web.Api.Extensions;
 using RuanFa.Shop.Application.Accounts.Models;
+using RuanFa.Shop.Web.Api.Extensions;
 
 namespace RuanFa.Shop.Web.Api.Endpoints.Accounts;
 
@@ -17,7 +17,7 @@ public class AuthenticationModule : ICarterModule
             .WithTags("Authentication")
             .WithOpenApi();
 
-        // Register
+        // Register user
         group.MapPost("/register", Register)
             .WithName("Register")
             .WithDescription("Creates a new user account")
@@ -27,7 +27,7 @@ public class AuthenticationModule : ICarterModule
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status500InternalServerError);
 
-        // Login
+        // Login user
         group.MapPost("/login", Login)
             .WithName("Login")
             .WithDescription("Authenticates a user and returns JWT tokens")
@@ -37,7 +37,7 @@ public class AuthenticationModule : ICarterModule
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status500InternalServerError);
 
-        // Refresh Token
+        // Refresh token
         group.MapPost("/refresh-token", RefreshToken)
             .WithName("RefreshToken")
             .WithDescription("Refreshes an expired access token using a refresh token")
@@ -48,6 +48,7 @@ public class AuthenticationModule : ICarterModule
             .ProducesProblem(StatusCodes.Status500InternalServerError);
     }
 
+    // Register user
     private static async Task<IResult> Register(
         RegisterCommand command,
         [FromServices] ISender sender)
@@ -56,6 +57,7 @@ public class AuthenticationModule : ICarterModule
         return result.ToTypedResult();
     }
 
+    // Login user
     private static async Task<IResult> Login(
         LoginQuery query,
         [FromServices] ISender sender)
@@ -64,6 +66,7 @@ public class AuthenticationModule : ICarterModule
         return result.ToTypedResult();
     }
 
+    // Refresh token
     private static async Task<IResult> RefreshToken(
         RefreshTokenCommand command,
         [FromServices] ISender sender)

@@ -10,7 +10,7 @@ internal sealed class TodoConfiguration : IEntityTypeConfiguration<TodoList>
 {
     public void Configure(EntityTypeBuilder<TodoList> builder)
     {
-        builder.ToTable(TableName.TodoLists);
+        builder.ToTable(Schema.TodoLists);
 
         // Configure primary key
         builder.HasKey(t => t.Id);

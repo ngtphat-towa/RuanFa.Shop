@@ -6,19 +6,20 @@ public static partial class DomainErrors
 {
     public static class ProductCategory
     {
-        public static Error InvalidProductId => Error.Validation(
-            code: "ProductCategory.InvalidProductId",
-            description: "The product ID must be a valid, non-empty GUID."
-        );
 
         public static Error InvalidCategoryId => Error.Validation(
             code: "ProductCategory.InvalidCategoryId",
             description: "The category ID must be a valid, non-empty GUID."
         );
 
-        public static Error DuplicateCategory => Error.Conflict(
+        public static Error AlreadyAssigned => Error.Conflict(
             code: "ProductCategory.DuplicateCategory",
             description: "The product is already associated with this category."
+        );
+
+        public static Error CategoryNotFound => Error.NotFound(
+            code: "ProductCategory.CategoryNotFound",
+            description: "The product is not associated with the specified category."
         );
 
         public static Error InactiveCategory => Error.Conflict(

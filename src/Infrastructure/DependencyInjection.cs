@@ -110,7 +110,8 @@ public static class DependencyInjection
         services.AddDbContext<ApplicationDbContext>((sp, options) =>
         {
             options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
-            options.UseNpgsql(connectionString)
+            //options.UseNpgsql(connectionString)
+            options.UseInMemoryDatabase(connectionString)
                 .UseSnakeCaseNamingConvention()
                 .EnableSensitiveDataLogging() // <-- Show parameter values
                 .EnableDetailedErrors();      // <-- More detailed error messages;

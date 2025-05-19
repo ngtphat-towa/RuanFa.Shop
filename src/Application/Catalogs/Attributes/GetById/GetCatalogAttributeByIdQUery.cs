@@ -9,10 +9,10 @@ using RuanFa.Shop.Application.Common.Security.Permissions;
 using RuanFa.Shop.Domain.Catalogs.Errors;
 using RuanFa.Shop.SharedKernel.Interfaces.Messaging;
 
-namespace RuanFa.Shop.Application.Catalogs.Attributes.ByIds;
+namespace RuanFa.Shop.Application.Catalogs.Attributes.GetById;
 
 [ApiAuthorize(Permission.Attribute.Get)]
-public record GetCatalogAttributeByIdQUery : IQuery<CatalogAttributeResult>
+public record GetCatalogAttributeByIdQUery : IQuery<AttributeResult>
 {
     public Guid Id { get; set; }
 }
@@ -20,9 +20,9 @@ public record GetCatalogAttributeByIdQUery : IQuery<CatalogAttributeResult>
 internal sealed class GetCatalogAttributeByIdQueryHandler(
     IApplicationDbContext context,
     IMapper mapper)
-    : IQueryHandler<GetCatalogAttributeByIdQUery, CatalogAttributeResult>
+    : IQueryHandler<GetCatalogAttributeByIdQUery, AttributeResult>
 {
-    public async Task<ErrorOr<CatalogAttributeResult>> Handle(
+    public async Task<ErrorOr<AttributeResult>> Handle(
         GetCatalogAttributeByIdQUery request,
         CancellationToken cancellationToken)
     {
@@ -30,7 +30,7 @@ internal sealed class GetCatalogAttributeByIdQueryHandler(
             .Include(m => m.AttributeOptions)
             .Include(m => m.AttributeGroupAttributes)
                 .ThenInclude(m => m.AttributeGroup)
-            .ProjectToType<CatalogAttributeResult>(mapper.Config)
+            .ProjectToType<AttributeResult>(mapper.Config)
             .FirstOrDefaultAsync(g => g.Id == request.Id, cancellationToken);
 
         if (group is null)

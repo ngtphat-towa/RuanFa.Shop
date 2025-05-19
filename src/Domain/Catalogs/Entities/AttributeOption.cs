@@ -9,14 +9,14 @@ namespace RuanFa.Shop.Domain.Catalogs.Entities;
 public class AttributeOption : Entity<Guid>
 {
     #region Properties
-    public string OptionText { get; private set; } = null!;
+    public string OptionValue { get; private set; } = null!;
+    public Guid AttributeId { get; private set; }
     #endregion
 
     #region Relationships
-    public Guid AttributeId { get; private set; }
     public CatalogAttribute Attribute { get; private set; } = null!;
-    private readonly List<VariantAttributeOption> _variantAttributeOptions = new();
-    public IReadOnlyCollection<VariantAttributeOption> VariantAttributeOptions => _variantAttributeOptions.AsReadOnly();
+    private readonly List<VariantAttributeValue> _variantAttributeValues = new();
+    public IReadOnlyCollection<VariantAttributeValue> VariantAttributeValues => _variantAttributeValues.AsReadOnly();
     #endregion
 
     #region Constructors
@@ -26,7 +26,7 @@ public class AttributeOption : Entity<Guid>
     {
         Id = Guid.NewGuid();
         AttributeId = attributeId;
-        OptionText = optionText.Trim();
+        OptionValue = optionText.Trim();
     }
     #endregion
 
@@ -59,7 +59,7 @@ public class AttributeOption : Entity<Guid>
         if (newText.Length > 100)
             return DomainErrors.AttributeOption.OptionTextTooLong;
 
-        OptionText = newText.Trim();
+        OptionValue = newText.Trim();
         AddDomainEvent(new AttributeOptionUpdatedEvent(Id, AttributeId, newText));
         return Result.Updated;
     }
@@ -67,7 +67,6 @@ public class AttributeOption : Entity<Guid>
 
     #region Domain Events
     public record AttributeOptionCreatedEvent(Guid OptionId, Guid AttributeId, string OptionText) : IDomainEvent;
-
     public record AttributeOptionUpdatedEvent(Guid OptionId, Guid AttributeId, string OptionText) : IDomainEvent;
     #endregion
 }

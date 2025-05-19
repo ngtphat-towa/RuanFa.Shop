@@ -9,6 +9,6 @@ internal class IdentityUserClaimConfiguration : IEntityTypeConfiguration<Identit
 {
     public void Configure(EntityTypeBuilder<IdentityUserClaim<Guid>> builder)
     {
-        builder.ToTable(TableName.UserClaims);
+        builder.ToTable(Schema.UserClaims);
     }
 }

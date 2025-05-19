@@ -1,26 +1,25 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Serilog;
 
-namespace RuanFa.Shop.Infrastructure.Data.Seeds
+namespace RuanFa.Shop.Infrastructure.Data.Seeds;
+
+public class SeedOrchestrator : IHostedService
 {
-    public class SeedOrchestrator : IHostedService
+    private readonly IEnumerable<IDataSeeder> _seeders;
+
+    public SeedOrchestrator(IEnumerable<IDataSeeder> seeders)
+        => _seeders = seeders;
+
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
-        private readonly IEnumerable<IDataSeeder> _seeders;
-
-        public SeedOrchestrator(IEnumerable<IDataSeeder> seeders)
-            => _seeders = seeders;
-
-        public async Task StartAsync(CancellationToken cancellationToken)
+        foreach (var seeder in _seeders)
         {
-            foreach (var seeder in _seeders)
-            {
-                var name = seeder.GetType().Name;
-                Log.Information("[SeedOrchestrator] Running {Seeder}", name);
-                await seeder.SeedAsync(cancellationToken);
-                Log.Information("[SeedOrchestrator] {Seeder} completed", name);
-            }
+            var name = seeder.GetType().Name;
+            Log.Information("[SeedOrchestrator] Running {Seeder}", name);
+            await seeder.SeedAsync(cancellationToken);
+            Log.Information("[SeedOrchestrator] {Seeder} completed", name);
         }
-
-        public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
     }
+
+    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }
