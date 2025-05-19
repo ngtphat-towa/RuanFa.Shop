@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using RuanFa.Shop.Domain.Attributes.Entities;
+using RuanFa.Shop.Domain.Catalogs.Entities;
 using RuanFa.Shop.Infrastructure.Data.Constants;
 
 namespace RuanFa.Shop.Infrastructure.Data.Configurations.Attributes;
@@ -26,7 +26,7 @@ internal sealed class AttributeOptionConfiguration : IEntityTypeConfiguration<At
             .HasForeignKey(t => t.AttributeId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasIndex(av => new { av.AttributeCode, av.OptionText })
+        builder.HasIndex(av => new { av.Code, av.OptionText })
             .IsUnique();
 
     }

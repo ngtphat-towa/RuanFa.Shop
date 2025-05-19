@@ -21,11 +21,6 @@ public static partial class DomainErrors
             description: "The product is already associated with this category."
         );
 
-        public static Error CategoryNotFound => Error.NotFound(
-            code: "ProductCategory.CategoryNotFound",
-            description: "The specified category was not found for this product."
-        );
-
         public static Error InactiveCategory => Error.Conflict(
             code: "ProductCategory.InactiveCategory",
             description: "Cannot add a product to an inactive category."

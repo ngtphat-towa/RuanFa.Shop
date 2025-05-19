@@ -85,6 +85,11 @@ namespace RuanFa.Shop.Domain.Catalogs.Errors
                 code: "Category.MetaDescriptionTooLong",
                 description: "The meta description must not exceed 160 characters."
             );
+
+            public static Error NotFound => Error.NotFound(
+                code: "Category.NotFound",
+                description: "The specified category was not found."
+            );
         }
     }
 }

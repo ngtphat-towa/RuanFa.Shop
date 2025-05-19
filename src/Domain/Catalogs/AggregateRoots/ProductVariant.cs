@@ -233,7 +233,7 @@ public class ProductVariant : AggregateRoot<Guid>
     {
         var option = _variantAttributeOptions.FirstOrDefault(opt => opt.AttributeOptionId == attributeOptionId);
         if (option == null)
-            return DomainErrors.VariantAttributeOption.AttributeOptionNotFound;
+            return DomainErrors.AttributeOption.NotFound;
 
         _variantAttributeOptions.Remove(option);
         AddDomainEvent(new VariantAttributeRemovedEvent(Id, attributeOptionId));

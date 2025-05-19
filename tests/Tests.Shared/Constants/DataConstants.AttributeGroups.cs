@@ -1,4 +1,4 @@
-﻿using RuanFa.Shop.Domain.Attributes;
+﻿using RuanFa.Shop.Domain.Catalogs.AggregateRoots;
 
 namespace RuanFa.Shop.Tests.Shared.Constants;
 

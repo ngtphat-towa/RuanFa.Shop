@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using RuanFa.Shop.Domain.Catalogs.Entities;
 using RuanFa.Shop.Infrastructure.Data.Constants;
 
-namespace RuanFa.Shop.Infrastructure.Data.Configurations.Catalogs;
+namespace RuanFa.Shop.Infrastructure.Data.Configurations.Products;
 
 internal class ProductImageConfiguration : IEntityTypeConfiguration<ProductImage>
 {
@@ -35,27 +35,21 @@ internal class ProductImageConfiguration : IEntityTypeConfiguration<ProductImage
         builder.OwnsOne(p => p.Image, image =>
         {
             image.Property(i => i.ImageType)
-                .HasColumnName("ImageType")
                 .IsRequired();
 
             image.Property(i => i.Url)
-                .HasColumnName("ImageUrl")
                 .IsRequired()
                 .HasMaxLength(500);
 
             image.Property(i => i.Alt)
-                .HasColumnName("AltText")
                 .IsRequired()
                 .HasMaxLength(125);
 
-            image.Property(i => i.Width)
-                .HasColumnName("ImageWidth");
+            image.Property(i => i.Width);
 
-            image.Property(i => i.Height)
-                .HasColumnName("ImageHeight");
+            image.Property(i => i.Height);
 
-            image.Property(i => i.FileSizeBytes)
-                .HasColumnName("ImageFileSizeBytes");
+            image.Property(i => i.FileSizeBytes);
         });
 
         // Indexes

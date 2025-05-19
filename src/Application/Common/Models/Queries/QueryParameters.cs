@@ -2,10 +2,10 @@
 
 public record QueryParameters
 {
-    public string? SearchTerm { get; set; }
-    public string? Filters { get; set; }
-    public int? PageIndex { get; set; }
-    public int? PageSize { get; set; }
-    public string? SortBy { get; set; }
+    public string? SearchTerm { get; set; } = null;
+    //public string? Filters { get; set; } = null;
+    public int? PageIndex { get; set; } = null;
+    public int? PageSize { get; set; } = null;
+    public string? SortBy { get; set; } = null;
     public string? SortDirection { get; set; } = "asc";
 }

@@ -1,4 +1,5 @@
 ﻿namespace RuanFa.Shop.Domain.Catalogs.Enums;
+
 public enum AttributeType : int
 {
     None = 0,
@@ -10,5 +11,5 @@ public enum AttributeType : int
     Select = 6,
     Checkbox = 7,
     Dropdown = 8,
-    Swatch = 9,
+    Swatch = 9
 }

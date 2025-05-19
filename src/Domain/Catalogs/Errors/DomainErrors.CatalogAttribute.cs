@@ -6,8 +6,8 @@ public static partial class DomainErrors
 {
     public static class CatalogAttribute
     {
-        public static Error InvalidAttributeId => Error.Validation(
-            code: "CatalogAttribute.InvalidAttributeId",
+        public static Error InvalidId => Error.Validation(
+            code: "CatalogAttribute.InvalidId",
             description: "The catalog attribute ID must be a valid, non-empty GUID."
         );
 
@@ -61,19 +61,20 @@ public static partial class DomainErrors
             description: $"An attribute with the code '{code}' already exists."
         );
 
-        public static Error NotFound => Error.NotFound(
+        public static Error NotFound(List<Guid>? missingIds = null) => Error.NotFound(
             code: "CatalogAttribute.NotFound",
-            description: "The specified catalog attribute was not found."
-        );
-
-        public static Error OptionNotFound => Error.NotFound(
-            code: "CatalogAttribute.OptionNotFound",
-            description: "The specified attribute option was not found."
+            description: missingIds?.Any() == true
+                ? $"One or more catalog attributes were not found: {string.Join(", ", missingIds)}."
+                : "The specified catalog attribute was not found."
         );
 
         public static Error InvalidSortOrder => Error.Validation(
             code: "CatalogAttribute.InvalidSortOrder",
             description: "The sort order must be a non-negative number."
         );
+
+        public static Error InUse => Error.Validation(
+            code: "CatalogAttribute.InUsed",
+            description: "Cannot delete attribute as it's currently in use by one or more attribute groups or products.");
     }
 }

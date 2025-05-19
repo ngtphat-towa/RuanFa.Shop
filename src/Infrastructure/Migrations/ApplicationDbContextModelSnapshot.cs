@@ -229,13 +229,627 @@ namespace RuanFa.Shop.Infrastructure.Migrations
                         .HasColumnName("wishlist");
 
                     b.HasKey("Id")
-                        .HasName("pk_user_profile");
+                        .HasName("pk_user_profiles");
 
                     b.HasIndex("UserId")
                         .IsUnique()
-                        .HasDatabaseName("ix_user_profile_user_id");
+                        .HasDatabaseName("ix_user_profiles_user_id");
 
-                    b.ToTable("user_profile", (string)null);
+                    b.ToTable("user_profiles", (string)null);
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.AggregateRoots.AttributeGroup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_attribute_groups");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_attribute_groups_name");
+
+                    b.ToTable("attribute_groups", (string)null);
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.AggregateRoots.CatalogAttribute", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<bool>("DisplayOnFrontend")
+                        .HasColumnType("boolean")
+                        .HasColumnName("display_on_frontend");
+
+                    b.Property<bool>("IsFilterable")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_filterable");
+
+                    b.Property<bool>("IsRequired")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_required");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
+                        .HasColumnName("type");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_attributes");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_attributes_code");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_attributes_name");
+
+                    b.ToTable("attributes", (string)null);
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.AggregateRoots.Category", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("IncludeInNav")
+                        .HasColumnType("boolean")
+                        .HasColumnName("include_in_nav");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("MetaDescription")
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)")
+                        .HasColumnName("meta_description");
+
+                    b.Property<string>("MetaKeywords")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("meta_keywords");
+
+                    b.Property<string>("MetaTitle")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("meta_title");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_id");
+
+                    b.Property<short?>("Position")
+                        .HasColumnType("smallint")
+                        .HasColumnName("position");
+
+                    b.Property<string>("ShortDescription")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("short_description");
+
+                    b.Property<bool>("ShowProducts")
+                        .HasColumnType("boolean")
+                        .HasColumnName("show_products");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.Property<string>("UrlKey")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("url_key");
+
+                    b.HasKey("Id")
+                        .HasName("pk_categories");
+
+                    b.HasIndex("Name")
+                        .HasDatabaseName("ix_categories_name");
+
+                    b.HasIndex("ParentId")
+                        .HasDatabaseName("ix_categories_parent_id");
+
+                    b.HasIndex("UrlKey")
+                        .IsUnique()
+                        .HasDatabaseName("ix_categories_url_key");
+
+                    b.ToTable("categories", (string)null);
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.AggregateRoots.Product", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("BasePrice")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("base_price");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("GroupId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("group_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Sku")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("sku");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<int>("TaxClass")
+                        .HasColumnType("integer")
+                        .HasColumnName("tax_class");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.Property<decimal>("Weight")
+                        .HasColumnType("decimal(10,2)")
+                        .HasColumnName("weight");
+
+                    b.HasKey("Id")
+                        .HasName("pk_products");
+
+                    b.HasIndex("GroupId")
+                        .HasDatabaseName("ix_products_group_id");
+
+                    b.HasIndex("Name")
+                        .HasDatabaseName("ix_products_name");
+
+                    b.HasIndex("Sku")
+                        .IsUnique()
+                        .HasDatabaseName("ix_products_sku");
+
+                    b.ToTable("products", (string)null);
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.AggregateRoots.ProductVariant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_default");
+
+                    b.Property<int>("LowStockThreshold")
+                        .HasColumnType("integer")
+                        .HasColumnName("low_stock_threshold");
+
+                    b.Property<decimal>("PriceOffset")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("price_offset");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("product_id");
+
+                    b.Property<string>("Sku")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("sku");
+
+                    b.Property<int>("StockQuantity")
+                        .HasColumnType("integer")
+                        .HasColumnName("stock_quantity");
+
+                    b.Property<int>("StockStatus")
+                        .HasColumnType("integer")
+                        .HasColumnName("stock_status");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_variants");
+
+                    b.HasIndex("ProductId")
+                        .HasDatabaseName("ix_variants_product_id");
+
+                    b.HasIndex("Sku")
+                        .IsUnique()
+                        .HasDatabaseName("ix_variants_sku");
+
+                    b.ToTable("variants", (string)null);
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.Entities.AttributeGroupAttribute", b =>
+                {
+                    b.Property<Guid>("AttributeGroupId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("attribute_group_id");
+
+                    b.Property<Guid>("AttributeId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("attribute_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("AttributeGroupId", "AttributeId")
+                        .HasName("pk_attribute_group_attributes");
+
+                    b.HasIndex("AttributeId")
+                        .HasDatabaseName("ix_attribute_group_attributes_attribute_id");
+
+                    b.ToTable("attribute_group_attributes", (string)null);
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.Entities.AttributeOption", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AttributeCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("attribute_code");
+
+                    b.Property<Guid>("AttributeId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("attribute_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("OptionText")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("option_text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_attribute_options");
+
+                    b.HasIndex("AttributeId")
+                        .HasDatabaseName("ix_attribute_options_attribute_id");
+
+                    b.HasIndex("AttributeCode", "OptionText")
+                        .IsUnique()
+                        .HasDatabaseName("ix_attribute_options_attribute_code_option_text");
+
+                    b.ToTable("attribute_options", (string)null);
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.Entities.ProductCategory", b =>
+                {
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("product_id");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("category_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("ProductId", "CategoryId")
+                        .HasName("pk_product_categories");
+
+                    b.HasIndex("CategoryId")
+                        .HasDatabaseName("ix_product_categories_category_id");
+
+                    b.HasIndex("ProductId")
+                        .HasDatabaseName("ix_product_categories_product_id");
+
+                    b.ToTable("product_categories", (string)null);
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.Entities.ProductImage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_default");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("product_id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.Property<Guid?>("VariantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("variant_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_product_images");
+
+                    b.HasIndex("VariantId")
+                        .HasDatabaseName("ix_product_images_variant_id");
+
+                    b.HasIndex("ProductId", "VariantId")
+                        .HasDatabaseName("ix_product_images_product_id_variant_id");
+
+                    b.ToTable("product_images", (string)null);
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.Entities.StockMovement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<int>("MovementType")
+                        .HasColumnType("integer")
+                        .HasColumnName("movement_type");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text")
+                        .HasColumnName("notes");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer")
+                        .HasColumnName("quantity");
+
+                    b.Property<Guid?>("ReferenceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reference_id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.Property<Guid>("VariantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("variant_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_stock_movement");
+
+                    b.HasIndex("VariantId")
+                        .HasDatabaseName("ix_stock_movement_variant_id");
+
+                    b.ToTable("stock_movement", (string)null);
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.Entities.VariantAttributeOption", b =>
+                {
+                    b.Property<Guid>("VariantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("variant_id");
+
+                    b.Property<Guid>("AttributeOptionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("attribute_option_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("VariantId", "AttributeOptionId")
+                        .HasName("pk_variants_attribute_options");
+
+                    b.HasIndex("AttributeOptionId")
+                        .HasDatabaseName("ix_variants_attribute_options_attribute_option_id");
+
+                    b.ToTable("variants_attribute_options", (string)null);
                 });
 
             modelBuilder.Entity("RuanFa.Shop.Domain.Orders.Order", b =>
@@ -597,7 +1211,226 @@ namespace RuanFa.Shop.Infrastructure.Migrations
                         .HasForeignKey("RuanFa.Shop.Domain.Accounts.Entities.UserProfile", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_user_profile_users_user_id");
+                        .HasConstraintName("fk_user_profiles_users_user_id");
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.AggregateRoots.Category", b =>
+                {
+                    b.HasOne("RuanFa.Shop.Domain.Catalogs.AggregateRoots.Category", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_categories_categories_parent_id");
+
+                    b.OwnsOne("RuanFa.Shop.Domain.Catalogs.ValueObjects.CategoryImage", "Image", b1 =>
+                        {
+                            b1.Property<Guid>("CategoryId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("Alt")
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("image_alt");
+
+                            b1.Property<string>("Url")
+                                .HasMaxLength(500)
+                                .HasColumnType("character varying(500)")
+                                .HasColumnName("image_url");
+
+                            b1.HasKey("CategoryId");
+
+                            b1.ToTable("categories");
+
+                            b1.WithOwner()
+                                .HasForeignKey("CategoryId")
+                                .HasConstraintName("fk_categories_categories_id");
+                        });
+
+                    b.Navigation("Image");
+
+                    b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.AggregateRoots.Product", b =>
+                {
+                    b.HasOne("RuanFa.Shop.Domain.Catalogs.AggregateRoots.AttributeGroup", "Group")
+                        .WithMany("Products")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_products_attribute_groups_group_id");
+
+                    b.Navigation("Group");
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.AggregateRoots.ProductVariant", b =>
+                {
+                    b.HasOne("RuanFa.Shop.Domain.Catalogs.AggregateRoots.Product", "Product")
+                        .WithMany("Variants")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_variants_products_product_id");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.Entities.AttributeGroupAttribute", b =>
+                {
+                    b.HasOne("RuanFa.Shop.Domain.Catalogs.AggregateRoots.AttributeGroup", "AttributeGroup")
+                        .WithMany("AttributeGroupAttributes")
+                        .HasForeignKey("AttributeGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_attribute_group_attributes_attribute_groups_attribute_group");
+
+                    b.HasOne("RuanFa.Shop.Domain.Catalogs.AggregateRoots.CatalogAttribute", "Attribute")
+                        .WithMany("AttributeGroupAttributes")
+                        .HasForeignKey("AttributeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_attribute_group_attributes_attributes_attribute_id");
+
+                    b.Navigation("Attribute");
+
+                    b.Navigation("AttributeGroup");
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.Entities.AttributeOption", b =>
+                {
+                    b.HasOne("RuanFa.Shop.Domain.Catalogs.AggregateRoots.CatalogAttribute", "Attribute")
+                        .WithMany("AttributeOptions")
+                        .HasForeignKey("AttributeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_attribute_options_attributes_attribute_id");
+
+                    b.Navigation("Attribute");
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.Entities.ProductCategory", b =>
+                {
+                    b.HasOne("RuanFa.Shop.Domain.Catalogs.AggregateRoots.Category", "Category")
+                        .WithMany("ProductCategories")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_product_categories_categories_category_id");
+
+                    b.HasOne("RuanFa.Shop.Domain.Catalogs.AggregateRoots.Product", "Product")
+                        .WithMany("ProductCategories")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_product_categories_product_product_id");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.Entities.ProductImage", b =>
+                {
+                    b.HasOne("RuanFa.Shop.Domain.Catalogs.AggregateRoots.Product", "Product")
+                        .WithMany("Images")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_product_images_products_product_id");
+
+                    b.HasOne("RuanFa.Shop.Domain.Catalogs.AggregateRoots.ProductVariant", "Variant")
+                        .WithMany("VariantImages")
+                        .HasForeignKey("VariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_product_images_product_variant_variant_id");
+
+                    b.OwnsOne("RuanFa.Shop.Domain.Catalogs.ValueObjects.ImageData", "Image", b1 =>
+                        {
+                            b1.Property<Guid>("ProductImageId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("Alt")
+                                .IsRequired()
+                                .HasMaxLength(125)
+                                .HasColumnType("character varying(125)")
+                                .HasColumnName("image_alt");
+
+                            b1.Property<long?>("FileSizeBytes")
+                                .HasColumnType("bigint")
+                                .HasColumnName("image_file_size_bytes");
+
+                            b1.Property<int?>("Height")
+                                .HasColumnType("integer")
+                                .HasColumnName("image_height");
+
+                            b1.Property<int>("ImageType")
+                                .HasColumnType("integer")
+                                .HasColumnName("image_image_type");
+
+                            b1.Property<string>("MimeType")
+                                .HasColumnType("text")
+                                .HasColumnName("image_mime_type");
+
+                            b1.Property<string>("Url")
+                                .IsRequired()
+                                .HasMaxLength(500)
+                                .HasColumnType("character varying(500)")
+                                .HasColumnName("image_url");
+
+                            b1.Property<int?>("Width")
+                                .HasColumnType("integer")
+                                .HasColumnName("image_width");
+
+                            b1.HasKey("ProductImageId");
+
+                            b1.ToTable("product_images");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ProductImageId")
+                                .HasConstraintName("fk_product_images_product_images_id");
+                        });
+
+                    b.Navigation("Image")
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Variant");
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.Entities.StockMovement", b =>
+                {
+                    b.HasOne("RuanFa.Shop.Domain.Catalogs.AggregateRoots.ProductVariant", "Variant")
+                        .WithMany("StockMovements")
+                        .HasForeignKey("VariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_stock_movement_product_variant_variant_id");
+
+                    b.Navigation("Variant");
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.Entities.VariantAttributeOption", b =>
+                {
+                    b.HasOne("RuanFa.Shop.Domain.Catalogs.Entities.AttributeOption", "AttributeOption")
+                        .WithMany("VariantAttributeOptions")
+                        .HasForeignKey("AttributeOptionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_variants_attribute_options_attribute_options_attribute_opti");
+
+                    b.HasOne("RuanFa.Shop.Domain.Catalogs.AggregateRoots.ProductVariant", "Variant")
+                        .WithMany("VariantAttributeOptions")
+                        .HasForeignKey("VariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_variants_attribute_options_product_variant_variant_id");
+
+                    b.Navigation("AttributeOption");
+
+                    b.Navigation("Variant");
                 });
 
             modelBuilder.Entity("RuanFa.Shop.Domain.Orders.Order", b =>
@@ -607,7 +1440,7 @@ namespace RuanFa.Shop.Infrastructure.Migrations
                         .HasForeignKey("Id")
                         .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired()
-                        .HasConstraintName("fk_order_user_profile_id");
+                        .HasConstraintName("fk_order_user_profiles_id");
 
                     b.Navigation("Profile");
                 });
@@ -627,6 +1460,50 @@ namespace RuanFa.Shop.Infrastructure.Migrations
             modelBuilder.Entity("RuanFa.Shop.Domain.Accounts.Entities.UserProfile", b =>
                 {
                     b.Navigation("Orders");
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.AggregateRoots.AttributeGroup", b =>
+                {
+                    b.Navigation("AttributeGroupAttributes");
+
+                    b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.AggregateRoots.CatalogAttribute", b =>
+                {
+                    b.Navigation("AttributeGroupAttributes");
+
+                    b.Navigation("AttributeOptions");
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.AggregateRoots.Category", b =>
+                {
+                    b.Navigation("Children");
+
+                    b.Navigation("ProductCategories");
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.AggregateRoots.Product", b =>
+                {
+                    b.Navigation("Images");
+
+                    b.Navigation("ProductCategories");
+
+                    b.Navigation("Variants");
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.AggregateRoots.ProductVariant", b =>
+                {
+                    b.Navigation("StockMovements");
+
+                    b.Navigation("VariantAttributeOptions");
+
+                    b.Navigation("VariantImages");
+                });
+
+            modelBuilder.Entity("RuanFa.Shop.Domain.Catalogs.Entities.AttributeOption", b =>
+                {
+                    b.Navigation("VariantAttributeOptions");
                 });
 
             modelBuilder.Entity("RuanFa.Shop.Domain.Todo.TodoList", b =>

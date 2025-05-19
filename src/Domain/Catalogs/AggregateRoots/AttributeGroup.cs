@@ -105,7 +105,7 @@ public class AttributeGroup : AggregateRoot<Guid>
         var attributeGroupAttribute = _attributeGroupAttributes.FirstOrDefault(aga => aga.AttributeId == attributeId);
         if (attributeGroupAttribute == null)
         {
-            return DomainErrors.AttributeGroupAttribute.AttributeNotFound;
+            return DomainErrors.CatalogAttribute.NotFound();
         }
 
         _attributeGroupAttributes.Remove(attributeGroupAttribute);

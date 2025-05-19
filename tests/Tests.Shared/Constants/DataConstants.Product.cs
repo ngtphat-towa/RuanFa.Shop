@@ -1,4 +1,4 @@
-﻿using RuanFa.Shop.Domain.Catalogs;
+﻿using RuanFa.Shop.Domain.Catalogs.AggregateRoots;
 using RuanFa.Shop.Domain.Catalogs.Enums;
 
 namespace RuanFa.Shop.Tests.Shared.Constants;

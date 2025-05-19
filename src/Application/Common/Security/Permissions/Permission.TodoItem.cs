@@ -9,6 +9,6 @@ public static partial class Permission
         public const string Get = "get:todo-item";
         public const string Delete = "delete:todo-item";
 
-        public static IReadOnlyList<string> Module = [Create, Update, Get, Delete];
+        public static readonly List<string> Module = [Create, Update, Get, Delete];
     }
 }

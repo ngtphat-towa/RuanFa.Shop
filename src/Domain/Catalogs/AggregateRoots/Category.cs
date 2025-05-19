@@ -301,7 +301,7 @@ public class Category : AggregateRoot<Guid>
     {
         var productCategory = _productCategories.FirstOrDefault(pc => pc.ProductId == productId);
         if (productCategory == null)
-            return DomainErrors.ProductCategory.CategoryNotFound;
+            return DomainErrors.Category.NotFound;
 
         _productCategories.Remove(productCategory);
         AddDomainEvent(new CategoryProductRemovedEvent(Id, productId));

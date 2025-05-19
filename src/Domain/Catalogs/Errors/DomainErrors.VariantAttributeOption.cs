@@ -21,19 +21,9 @@ public static partial class DomainErrors
             description: "The attribute option is already associated with this variant."
         );
 
-        public static Error AttributeOptionNotFound => Error.NotFound(
-            code: "VariantAttributeOption.AttributeOptionNotFound",
-            description: "The specified attribute option is not associated with this variant."
-        );
-
         public static Error NoAttributeOptionsProvided => Error.Validation(
             code: "VariantAttributeOption.NoAttributeOptionsProvided",
             description: "At least one attribute option must be provided."
-        );
-
-        public static Error InvalidAttributeForGroup => Error.Validation(
-            code: "VariantAttributeOption.InvalidAttributeForGroup",
-            description: "The attribute option does not belong to the product's attribute group."
         );
     }
 

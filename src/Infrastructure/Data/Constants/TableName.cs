@@ -23,5 +23,7 @@ public static class TableName
     public const string ProductCategories = "product_categories";
 
     public const string Products = "products";
-
+    public const string ProductImages = "product_images";
+    public const string Variants = "variants";
+    public const string VariantAttributeOptions = "variants_attribute_options";
 }

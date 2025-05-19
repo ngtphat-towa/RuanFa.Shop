@@ -1,4 +1,4 @@
-﻿using RuanFa.Shop.Domain.Attributes.Entities;
+﻿using RuanFa.Shop.Domain.Catalogs.Entities;
 
 namespace RuanFa.Shop.Tests.Shared.Constants;
 

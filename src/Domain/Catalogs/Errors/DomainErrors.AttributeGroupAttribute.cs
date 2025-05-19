@@ -20,10 +20,5 @@ public static partial class DomainErrors
             code: "AttributeGroupAttribute.DuplicateAttribute",
             description: "The attribute is already associated with this attribute group."
         );
-
-        public static Error AttributeNotFound => Error.NotFound(
-            code: "AttributeGroupAttribute.AttributeNotFound",
-            description: "The specified attribute is not associated with this attribute group."
-        );
     }
 }

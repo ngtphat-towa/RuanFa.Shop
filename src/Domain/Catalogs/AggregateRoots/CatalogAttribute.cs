@@ -52,30 +52,30 @@ public class CatalogAttribute : AggregateRoot<Guid>
 
     #region Factory
     public static ErrorOr<CatalogAttribute> Create(
-        string attributeCode,
-        string attributeName,
+        string code,
+        string name,
         AttributeType type,
         bool isRequired = false,
         bool displayOnFrontend = false,
         int sortOrder = 0,
         bool isFilterable = false)
     {
-        if (string.IsNullOrWhiteSpace(attributeCode))
+        if (string.IsNullOrWhiteSpace(code))
             return DomainErrors.CatalogAttribute.EmptyCode;
 
-        if (attributeCode.Length < 3)
+        if (code.Length < 3)
             return DomainErrors.CatalogAttribute.CodeTooShort;
 
-        if (attributeCode.Length > 50)
+        if (code.Length > 50)
             return DomainErrors.CatalogAttribute.CodeTooLong;
 
-        if (!Regex.IsMatch(attributeCode, @"^[a-zA-Z0-9\-_]+$"))
+        if (!Regex.IsMatch(code, @"^[a-zA-Z0-9\-_]+$"))
             return DomainErrors.CatalogAttribute.InvalidCodeFormat;
 
-        if (string.IsNullOrWhiteSpace(attributeName))
+        if (string.IsNullOrWhiteSpace(name))
             return DomainErrors.CatalogAttribute.EmptyName;
 
-        if (attributeName.Length > 100)
+        if (name.Length > 100)
             return DomainErrors.CatalogAttribute.NameTooLong;
 
         if (!Enum.IsDefined(typeof(AttributeType), type) || type == AttributeType.None)
@@ -85,15 +85,15 @@ public class CatalogAttribute : AggregateRoot<Guid>
             return DomainErrors.CatalogAttribute.InvalidSortOrder;
 
         var attribute = new CatalogAttribute(
-            code: attributeCode,
-            name: attributeName,
+            code: code,
+            name: name,
             type: type,
             isRequired: isRequired,
             displayOnFrontend: displayOnFrontend,
             sortOrder: sortOrder,
             isFilterable: isFilterable);
 
-        attribute.AddDomainEvent(new CatalogAttributeCreatedEvent(attribute.Id, attributeCode, attributeName, type));
+        attribute.AddDomainEvent(new CatalogAttributeCreatedEvent(attribute.Id, code, name, type));
         return attribute;
     }
     #endregion
@@ -168,14 +168,13 @@ public class CatalogAttribute : AggregateRoot<Guid>
         return Result.Updated;
     }
 
-    public ErrorOr<AttributeOption> AddOption(string optionText)
+    public ErrorOr<AttributeOption> AddOption(string optionText, string? code = null)
     {
         if ((Type != AttributeType.Dropdown && Type != AttributeType.Swatch) && _attributeOptions.Any())
             return DomainErrors.CatalogAttribute.OptionsNotSupportedForType;
 
         var optionResult = AttributeOption.Create(
             attributeId: Id,
-            attributeCode: Code,
             optionText: optionText);
 
         if (optionResult.IsError)
@@ -191,7 +190,7 @@ public class CatalogAttribute : AggregateRoot<Guid>
     {
         var option = _attributeOptions.FirstOrDefault(o => o.Id == optionId);
         if (option == null)
-            return DomainErrors.CatalogAttribute.OptionNotFound;
+            return DomainErrors.AttributeOption.NotFound;
 
         _attributeOptions.Remove(option);
         AddDomainEvent(new CatalogAttributeOptionRemovedEvent(Id, optionId));

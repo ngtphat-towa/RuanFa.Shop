@@ -1,5 +1,5 @@
-﻿using RuanFa.Shop.Domain.Categorizations;
-using RuanFa.Shop.Domain.Categorizations.ValueObjects;
+﻿using RuanFa.Shop.Domain.Catalogs.AggregateRoots;
+using RuanFa.Shop.Domain.Catalogs.ValueObjects;
 
 namespace RuanFa.Shop.Tests.Shared.Constants;
 

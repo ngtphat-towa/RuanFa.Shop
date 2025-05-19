@@ -35,4 +35,8 @@
     <InternalsVisibleTo Include="RuanFa.Shop.Tests.Shared" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>
